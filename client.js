@@ -58,7 +58,7 @@ const $joinGameButton = document.getElementById('join');
 $joinGameButton.addEventListener('click', () => {
   const playerName = document.getElementById('nameJoin').value;
   const roomId = document.getElementById('roomJoin').value;
-  ioClient.emit('join', playerName, roomId);
+  ioClient.emit('join room', playerName, roomId);
 });
 
 

@@ -137,16 +137,6 @@ server.on('connection', (socket) => {
     socket.join(roomId);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
     socket.broadcast.emit('room created', roomId);
-
-    console.log(rooms);
-    // socket.broadcast.to(roomId).emit('message', `Game created: ${roomId}`);
-    // socket.to(roomId).emit('message', `Game created: ${roomId}`);
-    // socket.emit('message', `Game created: ${roomId}`);
-    // server.to(roomId).emit('room created', roomId, 'Waiting for the second player to join.');
-
-    // emitCreateRoomConfirmation(socket);
-    // addPlayer(playerName, playerId);
-    // socket.emit('message', 'Waiting for the second player to join.');
   });
 
   socket.on('join room', (playerName, roomId) => {
@@ -158,31 +148,13 @@ server.on('connection', (socket) => {
       }
     }
 
-    if (roomToJoin.namePlayerOne === playerName || roomToJoin.roomId === roomId) {
-      socket.emit('message', 'Invalid name and/or room ID');
-    } else {
-      // add the second player
+    if (roomToJoin && roomToJoin.namePlayerOne !== playerName) {
       socket.join(roomId);
+      socket.broadcast.to(roomId).emit('startGame', matrix);
+      socket.emit('startGame', matrix);
+    } else {
+      socket.emit('message', 'Invalid name and/or room ID');
     }
-    // // check the number of players hwo joined the game
-    // switch (players.length) {
-    //   case 0:
-    //     addPlayer(playerName, playerId);
-    //     socket.emit('message', 'Waiting for the second player to join.');
-    //     break;
-
-    //   case 1:
-    //     if (validName(playerName)) {
-    //       addPlayer(playerName, socket);
-    //       startGame(socket);
-    //     } else {
-    //       socket.emit('message', 'This name is already in use. Try something else.');
-    //     }
-    //     break;
-
-    //   default:
-    //     socket.emit('message', 'Too many players');
-    // }
   });
 
 
