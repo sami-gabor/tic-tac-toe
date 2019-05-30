@@ -136,6 +136,7 @@ server.on('connection', (socket) => {
     createRoom(playerName, roomId);
     socket.join(roomId);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
+    socket.emit('set room id', playerName);
     socket.broadcast.emit('room created', roomId);
   });
 
@@ -156,6 +157,7 @@ server.on('connection', (socket) => {
 
       socket.emit('startGame', matrix);
       socket.emit('freeze game', 'wait...');
+      socket.emit('set room id', playerName);
     } else {
       socket.emit('message', 'Invalid name and/or room ID');
     }
@@ -163,7 +165,7 @@ server.on('connection', (socket) => {
 
 
   // verify if the message reveived(obj) has the cellIndex property
-  socket.on('gameInput', (cellIndex) => {
+  socket.on('gameInput', (cellIndex, roomId) => { // change roomId with some hash
     let winner;
     movesCount += 1;
     // determine what the current cellValue is and update the matrix with it
@@ -172,7 +174,7 @@ server.on('connection', (socket) => {
     currentMoveIsX = !currentMoveIsX;
 
     socket.emit('freeze game', 'wait a sec...');
-    socket.broadcast.emit('unfreeze game', 'It\'s your turn!');
+    socket.broadcast.to(roomId).emit('unfreeze game', 'It\'s your turn!');
 
     socket.broadcast.emit('updateGame', cellIndex, cellValue); // broadcast message to everyone except the sender
     socket.emit('updateGame', cellIndex, cellValue); // broadcast message back to sender
