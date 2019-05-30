@@ -126,18 +126,41 @@ const createRoom = (playerName, roomId) => {
 
 const emitCreateRoomConfirmation = (socket) => {
   socket.emit('room created', socket.id);
-}
+};
 
 
 server.on('connection', (socket) => {
   const playerId = socket.id;
 
-  socket.on('new', (playerName) => {
-    createRoom(playerName, socket.id);
-    emitCreateRoomConfirmation(socket);
+  socket.on('new room', (playerName, roomId) => {
+    console.log(playerName, roomId);
+    createRoom(playerName, roomId);
+    console.log(rooms);
+    socket.emit('wait player 2', 'Waiting for the second player to join.');
+    // socket.join(roomId);
+    // socket.broadcast.to(roomId).emit('message', `Game created: ${roomId}`);
+    // socket.to(roomId).emit('message', `Game created: ${roomId}`);
+    // socket.emit('message', `Game created: ${roomId}`);
+    // server.to(roomId).emit('room created', roomId, 'Waiting for the second player to join.');
+
+    // emitCreateRoomConfirmation(socket);
+    // addPlayer(playerName, playerId);
+    // socket.emit('message', 'Waiting for the second player to join.');
   });
 
-  socket.on('join', (playerName) => {
+  socket.on('join', (playerName, roomId) => {
+    const existingRoom = rooms.forEach((room) => {
+      if (room.id === roomId) {
+        return true;
+      }
+    });
+
+    if (existingRoom) {
+      // add the second player
+      socket.join(roomId);
+    } else {
+      socket.emit('message', 'Invalid room ID');
+    }
     // check the number of players hwo joined the game
     switch (players.length) {
       case 0:

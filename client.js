@@ -46,17 +46,18 @@ const freezeBoardGame = () => {
 
 
 // create a room and automatically add the player to it
-const $createGameRoom = document.getElementById('new');
-$createGameRoom.addEventListener('click', () => {
+const $newGameButton = document.getElementById('new');
+$newGameButton.addEventListener('click', () => {
   const playerName = document.getElementById('nameNew').value;
-  ioClient.emit('new', playerName);
+  const roomId = document.getElementById('roomNew').value;
+  ioClient.emit('new room', playerName, roomId);
 });
 
 // send the player name(from the input field) to server
 const $joinGameButton = document.getElementById('join');
 $joinGameButton.addEventListener('click', () => {
   const playerName = document.getElementById('nameJoin').value;
-  const roomId = document.getElementById('room').value;
+  const roomId = document.getElementById('roomJoin').value;
   ioClient.emit('join', playerName, roomId);
 });
 
@@ -87,6 +88,12 @@ ioClient.on('room created', (roomId) => {
 ioClient.on('startGame', (emptyMatrix) => {
   createTable(emptyMatrix);
   addGameInputListener();
+});
+
+ioClient.on('wait player 2', (message) => {
+  // clear page and display the waiting message
+  document.getElementById('container').innerHTML = '';
+  updateMessageField(message);
 });
 
 ioClient.on('updateGame', (cellIndex, cellValue) => {
