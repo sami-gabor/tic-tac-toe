@@ -150,8 +150,12 @@ server.on('connection', (socket) => {
 
     if (roomToJoin && roomToJoin.namePlayerOne !== playerName) {
       socket.join(roomId);
+
       socket.broadcast.to(roomId).emit('startGame', matrix);
+      socket.broadcast.to(roomId).emit('message', 'your move');
+
       socket.emit('startGame', matrix);
+      socket.emit('freeze game', 'wait...');
     } else {
       socket.emit('message', 'Invalid name and/or room ID');
     }
