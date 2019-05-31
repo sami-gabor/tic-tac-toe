@@ -36,7 +36,7 @@ const updateGameBoard = (cellIndex, currentPlayerSelection) => {
 const handleGameClick = (e) => {
   const cellIndex = e.target.id;
   const roomIdHash = document.getElementById('room-id-hash').value;
-  ioClient.emit('gameInput', cellIndex, roomIdHash); // change roomId with some hash
+  ioClient.emit('game input', cellIndex, roomIdHash); // change roomId with some hash
 };
 
 
@@ -86,7 +86,7 @@ ioClient.on('room created', (roomId) => {
   addNewRoom(roomId);
 });
 
-ioClient.on('startGame', (emptyMatrix) => {
+ioClient.on('start game', (emptyMatrix) => {
   createTable(emptyMatrix);
   addGameInputListener();
 });
@@ -101,11 +101,11 @@ ioClient.on('set room id hash', (roomIdHash) => {
   document.getElementById('room-id-hash').innerText = roomIdHash;
 });
 
-ioClient.on('updateGame', (cellIndex, cellValue) => {
+ioClient.on('update game', (cellIndex, cellValue) => {
   updateGameBoard(cellIndex, cellValue);
 });
 
-ioClient.on('gameOver', (message) => {
+ioClient.on('game over', (message) => {
   updateMessageField(message);
   freezeBoardGame();
 });
@@ -116,6 +116,7 @@ ioClient.on('freeze game', (message) => {
 });
 
 ioClient.on('unfreeze game', (message) => {
+  console.log(message);
   updateMessageField(message);
   addGameInputListener();
 });
