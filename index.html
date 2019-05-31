@@ -10,24 +10,24 @@
 </head>
 <body>
     <h1>Tic - Tac - Toe</h1>
-    <h3><span>Room ID:</span><span id="room-id-hash"></span></h3>
-    <h3 id="player-name"></h3>
+    <h3><span>Room ID: &nbsp; </span><span id="room-id-hash"></span></h3>
+    <h3><span>Player name: &nbsp; </span><span id="player-name"></span></h3>
     <div id="container" class="container">
         <div class="menu">
           <h3>How To Play</h3>
           <ol>
-              <li>Player 1: Create a new game by entering the username</li>
-              <li>Player 2: Enter another username and the room id.</li>
+              <li>Player 1: Create a new game by entering the username and room id(random ones are generated if left blank).</li>
+              <li>Player 2: Enter another username and the room id(or click on any of the available rooms).</li>
               <li>Click on join game. </li>
           </ol>
           <h4>Create a new Game</h4>
-          <input type="text" name="name" id="nameNew" placeholder="Enter your name" required>
-          <input type="text" name="roomNew" id="roomNew" placeholder="Enter New Room ID" required>
+          <input type="text" name="name" id="nameNew" placeholder="Enter your name" >
+          <input type="text" name="roomNew" id="roomNew" placeholder="Enter New Room ID" >
           <button id="new">New Game</button>
           <br><br>
           <h4>Join an existing game</h4>
-          <input type="text" name="name" id="nameJoin" placeholder="Enter your name" required>
-          <input type="text" name="roomJoin" id="roomJoin" placeholder="Enter Active Room ID" required>
+          <input type="text" name="name" id="nameJoin" placeholder="Enter your name" >
+          <input type="text" name="roomJoin" id="roomJoin" placeholder="Enter Active Room ID" >
           <button id="join">Join Game</button>
         </div>
         <div>

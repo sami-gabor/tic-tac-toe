@@ -109,7 +109,10 @@ const roomIsFull = (room) => {
 server.on('connection', (socket) => {
   const playerId = socket.id;
 
-  socket.on('new room', (playerName, roomId) => {
+  socket.on('new room', (name, room) => {
+    const playerName = name || generateName();
+    const roomId = room || socket.id;
+
     createRoom(playerName, roomId);
     socket.join(roomId);
     socket.emit('wait player 2', 'Waiting for the second player to join.');

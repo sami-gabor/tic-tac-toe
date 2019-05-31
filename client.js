@@ -77,8 +77,7 @@ const addNewRoom = (roomId) => {
 
   $room.addEventListener('click', () => {
     document.getElementById('container').innerHTML = '';
-    ioClient.emit('join room', '', roomId);
-    // updateMessageField('John Doe, wait for the second player!');
+    ioClient.emit('join room', undefined, roomId);
   });
 };
 
