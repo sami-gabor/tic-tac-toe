@@ -103,8 +103,9 @@ ioClient.on('wait player 2', (message) => {
   updateMessageField(message);
 });
 
-ioClient.on('set room id hash', (roomIdHash) => {
+ioClient.on('set room id hash and player name', (roomIdHash, playerName) => {
   document.getElementById('room-id-hash').innerText = roomIdHash;
+  document.getElementById('player-name').innerText = playerName;
 });
 
 ioClient.on('update game', (cellIndex, cellValue) => {

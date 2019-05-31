@@ -144,7 +144,7 @@ server.on('connection', (socket) => {
     createRoom(playerName, roomId);
     socket.join(roomId);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
-    socket.emit('set room id hash', roomId);
+    socket.emit('set room id hash and player name', roomId, playerName);
     socket.broadcast.emit('room created', roomId);
   });
 
@@ -166,7 +166,7 @@ server.on('connection', (socket) => {
 
       socket.emit('start game', matrix);
       socket.emit('freeze game', 'wait for player one\'s first move');
-      socket.emit('set room id hash', roomId);
+      socket.emit('set room id hash and player name', roomId, playerName);
     } else {
       socket.emit('message', 'Invalid name and/or room ID');
     }
