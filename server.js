@@ -175,6 +175,7 @@ server.on('connection', (socket) => {
 
   // verify if the message reveived(obj) has the cellIndex property
   socket.on('game input', (cellIndex, roomIdHash) => { // change roomIdHash with some hash
+    console.log(cellIndex, roomIdHash);
     let winner;
     movesCount += 1;
     // determine what the current cellValue is and update the matrix with it

@@ -35,7 +35,8 @@ const updateGameBoard = (cellIndex, currentPlayerSelection) => {
 
 const handleGameClick = (e) => {
   const cellIndex = e.target.id;
-  const roomIdHash = document.getElementById('room-id-hash').value;
+  const roomIdHash = document.getElementById('room-id-hash').innerText; // doesn't take the value !!!
+  console.log('roomIdHash: ', roomIdHash);
   ioClient.emit('game input', cellIndex, roomIdHash); // change roomId with some hash
 };
 
