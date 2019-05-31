@@ -67,9 +67,7 @@ const checkSecondaryDiagonal = (currentSelection) => {
 };
 
 
-const checkWinner = (cellIndex, currentSelection) => {
-  const [rowIndex, colIndex] = cellIndex;
-
+const checkWinner = ([rowIndex, colIndex], currentSelection) => {
   if (checkRow(rowIndex, currentSelection)
     || checkCol(colIndex, currentSelection)
     || ((rowIndex === colIndex) && checkPrincipalDiagonal(currentSelection))
@@ -82,50 +80,21 @@ const checkWinner = (cellIndex, currentSelection) => {
 
 
 const updateMatrix = ([rowIndex, colIndex], clientSelection) => {
-  // const [rowIndex, colIndex] = index;
   matrix[rowIndex][colIndex] = clientSelection;
 };
 
 
 // handle communication channels with clients
 const io = require('socket.io');
+const generateName = require('sillyname');
 
 const server = io.listen(8000);
 let currentMoveIsX = true;
 let movesCount = 0;
-// will store the name, ID for every player
-const players = [];
 const rooms = [];
-
-const addPlayer = (name, socket) => {
-  players.push({ name, id: socket.id });
-  console.log(`${socket.id} was succesfully changed to "${name}".`);
-};
-
-const validName = (name) => {
-  for (let i = 0; i < players.length; i += 1) {
-    if (players[i].name === name) {
-      return false;
-    }
-  }
-  return true;
-};
-
-const startGame = (socket) => {
-  // broadcast back to sender
-  socket.emit('startGame', matrix);
-  socket.emit('freeze game', `Wait for ${players[0].name} to move.`);
-  // broadcast to everyone except the sender
-  socket.broadcast.emit('startGame', matrix);
-  socket.broadcast.emit('message', 'It\' your turn!');
-};
 
 const createRoom = (playerName, roomId) => {
   rooms.push({ roomId, namePlayerOne: playerName, namePlayerTwo: '' });
-};
-
-const emitCreateRoomConfirmation = (socket) => {
-  socket.emit('room created', socket.id);
 };
 
 const nameIsTaken = (room, name) => {
@@ -148,7 +117,8 @@ server.on('connection', (socket) => {
     socket.broadcast.emit('room created', roomId);
   });
 
-  socket.on('join room', (playerName, roomId) => {
+  socket.on('join room', (name, roomId) => {
+    const playerName = name || generateName();
     let roomToJoin;
     for (let i = 0; i < rooms.length; i += 1) {
       if (rooms[i].roomId === roomId) {
@@ -175,7 +145,6 @@ server.on('connection', (socket) => {
 
   // verify if the message reveived(obj) has the cellIndex property
   socket.on('game input', (cellIndex, roomIdHash) => { // change roomIdHash with some hash
-    console.log(cellIndex, roomIdHash);
     let winner;
     movesCount += 1;
     // determine what the current cellValue is and update the matrix with it
@@ -189,14 +158,14 @@ server.on('connection', (socket) => {
     socket.broadcast.to(roomIdHash).emit('unfreeze game', 'It\'s your turn!');
 
 
-    // if (checkWinner(cellIndex, cellValue)) {
-    //   winner = cellValue;
-    //   socket.broadcast.to(roomIdHash).emit('game over', `Player ${winner} won!`);
-    //   socket.emit('game over', `Player ${winner} won!`);
-    // } else if (movesCount === 9) {
-    //   socket.broadcast.to(roomIdHash).emit('game over', 'It\'s a tie. Nobody won!');
-    //   socket.emit('game over', 'It\'s a tie. Nobody won!');
-    // }
+    if (checkWinner(cellIndex, cellValue)) {
+      winner = cellValue;
+      socket.broadcast.to(roomIdHash).emit('game over', `Player ${winner} won!`);
+      socket.emit('game over', `Player ${winner} won!`);
+    } else if (movesCount === 9) {
+      socket.broadcast.to(roomIdHash).emit('game over', 'It\'s a tie. Nobody won!');
+      socket.emit('game over', 'It\'s a tie. Nobody won!');
+    }
   });
 
   socket.on('disconnect', () => {

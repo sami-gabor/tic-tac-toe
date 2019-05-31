@@ -35,8 +35,7 @@ const updateGameBoard = (cellIndex, currentPlayerSelection) => {
 
 const handleGameClick = (e) => {
   const cellIndex = e.target.id;
-  const roomIdHash = document.getElementById('room-id-hash').innerText; // doesn't take the value !!!
-  console.log('roomIdHash: ', roomIdHash);
+  const roomIdHash = document.getElementById('room-id-hash').innerText;
   ioClient.emit('game input', cellIndex, roomIdHash); // change roomId with some hash
 };
 
@@ -78,7 +77,7 @@ const addNewRoom = (roomId) => {
 
   $room.addEventListener('click', () => {
     document.getElementById('container').innerHTML = '';
-    ioClient.emit('join room', 'John Doe', roomId);
+    ioClient.emit('join room', '', roomId);
     // updateMessageField('John Doe, wait for the second player!');
   });
 };
