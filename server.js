@@ -128,6 +128,14 @@ const emitCreateRoomConfirmation = (socket) => {
   socket.emit('room created', socket.id);
 };
 
+const nameIsTaken = (room, name) => {
+  return room.namePlayerOne === name;
+};
+
+const roomIsFull = (room) => {
+  return Boolean(room.namePlayerTwo);
+};
+
 
 server.on('connection', (socket) => {
   const playerId = socket.id;
@@ -136,7 +144,7 @@ server.on('connection', (socket) => {
     createRoom(playerName, roomId);
     socket.join(roomId);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
-    socket.emit('set room id', playerName);
+    socket.emit('set room id hash', roomId);
     socket.broadcast.emit('room created', roomId);
   });
 
@@ -149,15 +157,16 @@ server.on('connection', (socket) => {
       }
     }
 
-    if (roomToJoin && roomToJoin.namePlayerOne !== playerName) {
+    if (roomToJoin && !nameIsTaken(roomToJoin, playerName) && !roomIsFull(roomToJoin)) {
       socket.join(roomId);
+      roomToJoin.namePlayerTwo = playerName;
 
       socket.broadcast.to(roomId).emit('startGame', matrix);
-      socket.broadcast.to(roomId).emit('message', 'your move');
+      socket.broadcast.to(roomId).emit('message', 'your first move');
 
       socket.emit('startGame', matrix);
-      socket.emit('freeze game', 'wait...');
-      socket.emit('set room id', playerName);
+      socket.emit('freeze game', 'wait for player one\'s first move');
+      socket.emit('set room id hash', roomId);
     } else {
       socket.emit('message', 'Invalid name and/or room ID');
     }
@@ -165,7 +174,7 @@ server.on('connection', (socket) => {
 
 
   // verify if the message reveived(obj) has the cellIndex property
-  socket.on('gameInput', (cellIndex, roomId) => { // change roomId with some hash
+  socket.on('gameInput', (cellIndex, roomIdHash) => { // change roomIdHash with some hash
     let winner;
     movesCount += 1;
     // determine what the current cellValue is and update the matrix with it
@@ -173,18 +182,18 @@ server.on('connection', (socket) => {
     updateMatrix(cellIndex, cellValue);
     currentMoveIsX = !currentMoveIsX;
 
-    socket.emit('freeze game', 'wait a sec...');
-    socket.broadcast.to(roomId).emit('unfreeze game', 'It\'s your turn!');
+    socket.emit('freeze game', 'wait a second...');
+    socket.broadcast.to(roomIdHash).emit('unfreeze game', 'It\'s your turn!');
 
-    socket.broadcast.emit('updateGame', cellIndex, cellValue); // broadcast message to everyone except the sender
+    socket.broadcast.to(roomIdHash).emit('updateGame', cellIndex, cellValue); // broadcast message to everyone except the sender
     socket.emit('updateGame', cellIndex, cellValue); // broadcast message back to sender
 
     if (checkWinner(cellIndex, cellValue)) {
       winner = cellValue;
-      socket.broadcast.emit('gameOver', `Player ${winner} won!`);
+      socket.broadcast.to(roomIdHash).emit('gameOver', `Player ${winner} won!`);
       socket.emit('gameOver', `Player ${winner} won!`);
     } else if (movesCount === 9) {
-      socket.broadcast.emit('gameOver', 'It\'s a tie. Nobody won!');
+      socket.broadcast.to(roomIdHash).emit('gameOver', 'It\'s a tie. Nobody won!');
       socket.emit('gameOver', 'It\'s a tie. Nobody won!');
     }
   });

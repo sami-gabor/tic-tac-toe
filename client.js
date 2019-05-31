@@ -35,8 +35,8 @@ const updateGameBoard = (cellIndex, currentPlayerSelection) => {
 
 const handleGameClick = (e) => {
   const cellIndex = e.target.id;
-  const roomId = document.getElementById('player-name').value;
-  ioClient.emit('gameInput', cellIndex, roomId); // change roomId with some hash
+  const roomIdHash = document.getElementById('room-id-hash').value;
+  ioClient.emit('gameInput', cellIndex, roomIdHash); // change roomId with some hash
 };
 
 
@@ -97,8 +97,8 @@ ioClient.on('wait player 2', (message) => {
   updateMessageField(message);
 });
 
-ioClient.on('set room id', (playerName) => {
-  document.getElementById('player-name').innerText = playerName;
+ioClient.on('set room id hash', (roomIdHash) => {
+  document.getElementById('room-id-hash').innerText = roomIdHash;
 });
 
 ioClient.on('updateGame', (cellIndex, cellValue) => {
