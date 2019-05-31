@@ -74,6 +74,12 @@ const addNewRoom = (roomId) => {
   const $room = document.createElement('li');
   $room.appendChild(document.createTextNode(roomId));
   $roomsList.appendChild($room);
+
+  $room.addEventListener('click', () => {
+    document.getElementById('container').innerHTML = '';
+    ioClient.emit('join room', 'John Doe', roomId);
+    // updateMessageField('John Doe, wait for the second player!');
+  });
 };
 
 
