@@ -1,0 +1,23 @@
+*** start a docker container --> cannot connect to db
+$ docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
+docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql:5
+
+***
+$ docker run -it --network some-network --rm mysql mysql -hsome-mysql -uexample-user -p
+docker run -it --network some-network --rm mysql mysql -hmysqll -uexample-user -p
+
+*** show all docker containers
+docker ps
+
+*** stop a docker instance
+docker stop #...
+
+*** remove all docksr instances
+docker rm $(docker ps -a -q)
+
+*** run mysql container
+docker run -it mysql -u root -proot
+
+*** open the mysql terminal
+mysql -u root -proot
+

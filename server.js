@@ -83,8 +83,10 @@ const updateMatrix = ([rowIndex, colIndex], clientSelection) => {
   matrix[rowIndex][colIndex] = clientSelection;
 };
 
+// ============================================================= //
+// ====== handle communication channels with clients =========== //
+// ============================================================= //
 
-// handle communication channels with clients
 const io = require('socket.io');
 const generateName = require('sillyname');
 
@@ -189,3 +191,45 @@ server.on('connection', (socket) => {
 
   console.log(`${socket.id} has connected.`);
 });
+
+
+// ============================================================= //
+// ========================== handle auth ====================== //
+// ============================================================= //
+
+
+const express = require('express');
+const cors = require('cors');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const db = require('./db');
+
+passport.use(new LocalStrategy((username, password, done) => {
+  db.users.findByUsername(username, (err, user) => {
+    if (err) { return done(err); }
+    if (!user) {
+      return done(null, false, { message: 'Incorrect username.' });
+    }
+    if (!user.validPassword(password)) {
+      return done(null, false, { message: 'Incorrect password.' });
+    }
+    return done(null, user);
+  });
+}));
+
+
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded());
+app.use(cors());
+
+app.post('/', (req, res) => res.json('Hello World!'));
+app.post('/login', (req, res) => res.json('Hello World to login!'));
+
+app.post('/login', passport.authenticate('local', {
+  successRedirect: '/',
+  failureRedirect: '/login',
+}));
+
+app.listen(3000);

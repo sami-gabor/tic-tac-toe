@@ -133,3 +133,30 @@ ioClient.on('message', (message) => {
 });
 
 ioClient.on('disconnect', () => console.log('The server has disconnected!'));
+
+
+// ============================================================= //
+// ========================== handle auth ====================== //
+// ============================================================= //
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const $login = document.getElementById('login-btn');
+
+  $login.addEventListener('click', () => {
+    const username = document.getElementById('username-input').value;
+    const password = document.getElementById('password-input').value;
+
+    const url = 'http://localhost:3000/login';
+    const data = { username, password };
+
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then(res => res.json())
+      .then(response => console.log('Success:', JSON.stringify(response)))
+      .catch(error => console.error('Error:', error));
+  });
+});
