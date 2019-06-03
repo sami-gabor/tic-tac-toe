@@ -224,12 +224,12 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
 
-app.post('/', (req, res) => res.json('Hello World!'));
-app.post('/login', (req, res) => res.json('Hello World to login!'));
+app.post('/', (req, res) => res.json(`Username: ${req.body.username}. Password: ${req.body.password}`));
+app.post('/login', (req, res) => res.json(`Username: ${req.body.username}. Password: ${req.body.password}`));
 
-app.post('/login', passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login',
-}));
+// app.post('/login', passport.authenticate('local', {
+//   successRedirect: '/',
+//   failureRedirect: '/login',
+// }));
 
 app.listen(3000);
