@@ -140,23 +140,23 @@ ioClient.on('disconnect', () => console.log('The server has disconnected!'));
 // ============================================================= //
 
 
-document.addEventListener('DOMContentLoaded', () => {
-  const $login = document.getElementById('login-btn');
+// document.addEventListener('DOMContentLoaded', () => {
+//   const $login = document.getElementById('login-btn');
 
-  $login.addEventListener('click', () => {
-    const username = document.getElementById('username-input').value;
-    const password = document.getElementById('password-input').value;
+//   $login.addEventListener('click', () => {
+//     const username = document.getElementById('username-input').value;
+//     const password = document.getElementById('password-input').value;
 
-    const url = 'http://localhost:3000/login';
-    const data = { username, password };
+//     const url = 'http://localhost:3000/login';
+//     const data = { username, password };
 
-    fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then(res => res.json())
-      .then(response => console.log('Success:', JSON.stringify(response)))
-      .catch(error => console.error('Error:', error));
-  });
-});
+//     fetch(url, {
+//       method: 'POST',
+//       body: JSON.stringify(data),
+//       headers: { 'Content-Type': 'application/json' },
+//     })
+//       .then(res => res.json())
+//       .then(response => console.log('Success:', JSON.stringify(response)))
+//       .catch(error => console.error('Error:', error));
+//   });
+// });

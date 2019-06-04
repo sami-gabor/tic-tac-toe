@@ -198,38 +198,104 @@ server.on('connection', (socket) => {
 // ============================================================= //
 
 
-const express = require('express');
-const cors = require('cors');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const db = require('./db');
+// const express = require('express');
+// const cors = require('cors');
+// const passport = require('passport');
+// const LocalStrategy = require('passport-local').Strategy;
+// const db = require('./db');
 
-passport.use(new LocalStrategy((username, password, done) => {
-  db.users.findByUsername(username, (err, user) => {
-    if (err) { return done(err); }
-    if (!user) {
-      return done(null, false, { message: 'Incorrect username.' });
-    }
-    if (!user.validPassword(password)) {
-      return done(null, false, { message: 'Incorrect password.' });
-    }
-    return done(null, user);
-  });
-}));
+// passport.use(new LocalStrategy((username, password, done) => {
+//   db.users.findByUsername(username, (err, user) => {
+//     if (err) { return done(err); }
+//     if (!user) {
+//       return done(null, false, { message: 'Incorrect username.' });
+//     }
+//     if (!user.validPassword(password)) {
+//       return done(null, false, { message: 'Incorrect password.' });
+//     }
+//     return done(null, user);
+//   });
+// }));
+
+
+// const app = express();
+
+// app.use(express.json());
+// app.use(express.urlencoded());
+// app.use(cors());
+
+// app.post('/', (req, res) => res.json(`Username: ${req.body.username}. Password: ${req.body.password}`));
+// app.post('/login', (req, res) => res.json(`Username: ${req.body.username}. Password: ${req.body.password}`));
+
+// // app.post('/login', passport.authenticate('local', {
+// //   successRedirect: '/',
+// //   failureRedirect: '/login',
+// // }));
+
+// app.listen(3000);
+
+
+// ============================================================= //
+// ===================== handle auth github ==================== //
+// ============================================================= //
+
+
+const express = require('express');
+const path = require('path');
+const session = require('express-session');
+const passport = require('passport');
+const GitHubStrategy = require('passport-github').Strategy;
+const passportConfig = require('./config');
 
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded());
-app.use(cors());
+app.use(session({
+  secret: 'Express is awesome!',
+  resave: false,
+  saveUninitialized: true,
+}));
 
-app.post('/', (req, res) => res.json(`Username: ${req.body.username}. Password: ${req.body.password}`));
-app.post('/login', (req, res) => res.json(`Username: ${req.body.username}. Password: ${req.body.password}`));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// app.post('/login', passport.authenticate('local', {
-//   successRedirect: '/',
-//   failureRedirect: '/login',
-// }));
+passport.use(new GitHubStrategy(passportConfig,
+  (accessToken, refreshToken, profile, cb) => {
+    // console.log(profile);
+    return cb(null, profile);
+  },
+));
+
+passport.serializeUser((user, cb) => {
+  cb(null, user);
+});
+passport.deserializeUser((user, cb) => {
+  cb(null, user);
+});
+
+app.get('/', (req, res) => {
+  // console.log('User data (Please!!!):');
+  // console.log(req.user); // this data gets saved when loging in and stays there during the session(when the server restarts the session is gone)
+  res.sendFile(path.join(__dirname, 'views/index.html'));
+  // res.send('works!!');
+});
+
+// app.get('/login', (req, res) => {
+//   console.log('test!!!');
+// });
+
+app.get('/login', passport.authenticate('github'));
+
+app.get('/auth', passport.authenticate('github', {
+  successRedirect: '/',
+  failureRedirect: '/loginFailed'
+}));
+
+
+app.get('/session', (req, res) => {
+  res.send(`My username from the session is: ${req.user.username}`);
+});
+
 
 app.listen(3000);
