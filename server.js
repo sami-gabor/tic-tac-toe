@@ -194,45 +194,35 @@ server.on('connection', (socket) => {
 
 
 // ============================================================= //
-// ========================== handle auth ====================== //
+// ====================== handle DB queries ==================== //
 // ============================================================= //
 
 
-// const express = require('express');
-// const cors = require('cors');
-// const passport = require('passport');
-// const LocalStrategy = require('passport-local').Strategy;
-// const db = require('./db');
+const mysql = require('mysql');
 
-// passport.use(new LocalStrategy((username, password, done) => {
-//   db.users.findByUsername(username, (err, user) => {
-//     if (err) { return done(err); }
-//     if (!user) {
-//       return done(null, false, { message: 'Incorrect username.' });
-//     }
-//     if (!user.validPassword(password)) {
-//       return done(null, false, { message: 'Incorrect password.' });
-//     }
-//     return done(null, user);
-//   });
-// }));
+const connection = mysql.createConnection({
+  host: 'localhost',
+  port: '3307',
+  user: 'root',
+  password: 'root',
+  database: 'github-users',
+});
 
 
-// const app = express();
+const getScore = (username) => {
+  connection.connect();
 
-// app.use(express.json());
-// app.use(express.urlencoded());
-// app.use(cors());
+  connection.query('SELECT * FROM users WHERE username = ?', [username], (error, results, fields) => {
+    if (error) {
+      console.log(error);
+    }
+    console.log('The solution is(userObj/score/username): ', results[0], results[0].score, results[0].username);
+  });
 
-// app.post('/', (req, res) => res.json(`Username: ${req.body.username}. Password: ${req.body.password}`));
-// app.post('/login', (req, res) => res.json(`Username: ${req.body.username}. Password: ${req.body.password}`));
+  connection.end();
 
-// // app.post('/login', passport.authenticate('local', {
-// //   successRedirect: '/',
-// //   failureRedirect: '/login',
-// // }));
-
-// app.listen(3000);
+  console.log('username is: ', username);
+};
 
 
 // ============================================================= //
@@ -258,14 +248,11 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
-passport.use(new GitHubStrategy(passportConfig,
-  (accessToken, refreshToken, profile, cb) => {
-    // console.log(profile);
-    return cb(null, profile);
-  },
-));
+passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, profile, cb) => {
+  return cb(null, profile);
+}));
 
 passport.serializeUser((user, cb) => {
   cb(null, user);
@@ -275,26 +262,29 @@ passport.deserializeUser((user, cb) => {
 });
 
 app.get('/', (req, res) => {
-  // console.log('User data (Please!!!):');
-  // console.log(req.user); // this data gets saved when loging in and stays there during the session(when the server restarts the session is gone)
-  res.sendFile(path.join(__dirname, 'views/index.html'));
-  // res.send('works!!');
+  if (req.user) {
+    getScore(req.user.username);
+    res.sendFile(path.join(__dirname, '/views/index.html'));
+  } else {
+    res.sendFile(path.join(__dirname, '/views/login.html'));
+  }
 });
 
-// app.get('/login', (req, res) => {
-//   console.log('test!!!');
-// });
-
-app.get('/login', passport.authenticate('github'));
+app.get('/login',
+  (req, res, next) => {
+    console.log('testing middleware...');
+    next();
+  },
+  passport.authenticate('github')); // username gets assigned to req.user(the session clears when the server restarts)
 
 app.get('/auth', passport.authenticate('github', {
   successRedirect: '/',
-  failureRedirect: '/loginFailed'
+  failureRedirect: '/loginFailed',
 }));
 
 
 app.get('/session', (req, res) => {
-  res.send(`My username from the session is: ${req.user.username}`);
+  res.send(`My username from the session i: ${req.user.username}.<br>I'm logged in with GitHub!`);
 });
 
 
