@@ -10,11 +10,11 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-connection.query('SELECT * FROM users WHERE username = ?', ['sam'], (error, results, fields) => {
+connection.query('SELECT * FROM users', (error, results, fields) => {
   if (error) {
     console.log(error);
   }
-  console.log('The solution is: ', results[0]);
+  console.log('The solution is: ', results);
 });
 
 connection.end();

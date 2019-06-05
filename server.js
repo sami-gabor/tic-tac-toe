@@ -205,7 +205,7 @@ const connection = mysql.createConnection({
   port: '3307',
   user: 'root',
   password: 'root',
-  database: 'github-users',
+  database: 'tic',
 });
 
 
@@ -223,6 +223,19 @@ const getScore = (username) => {
   connection.end();
 
   console.log('username is: ', username);
+};
+
+const storeUserData = (username, password, email) => {
+  const records = [
+    [username, password, email],
+  ];
+  connection.connect();
+
+  connection.query('INSERT INTO users (username, password, email) VALUES ?', [records], (error, results, fields) => {
+    if (error) throw error;
+  });
+
+  connection.end();
 };
 
 
@@ -255,14 +268,14 @@ app.use(passport.session());
 app.use(express.static('public'));
 
 passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, profile, cb) => {
+  console.log('accessToken, refreshToken: ', accessToken, refreshToken);
   return cb(null, profile);
 }));
 
 passport.use(new LocalStrategy((username, password, done) => {
   console.log('LocalStrategy!!!: ', username, password, done);
   return done(null, username);
-}
-));
+}));
 
 passport.serializeUser((user, cb) => {
   cb(null, user);
@@ -314,9 +327,10 @@ app.post('/login-local', passport.authenticate('local', {
   failureRedirect: '/login',
 }));
 
-app.post('/register-local', passport.authenticate('local', {
-  successRedirect: '/login',
-  failureRedirect: '/error',
-}));
+
+app.post('/register-local', (req, res) => {
+  storeUserData(req.body.username, req.body.password, req.body.email);
+  res.redirect('/login');
+});
 
 app.listen(3000);
