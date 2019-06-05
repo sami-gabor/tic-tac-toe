@@ -194,52 +194,6 @@ server.on('connection', (socket) => {
 
 
 // ============================================================= //
-// ====================== handle DB queries ==================== //
-// ============================================================= //
-
-
-const mysql = require('mysql');
-
-const connection = mysql.createConnection({
-  host: 'localhost',
-  port: '3307',
-  user: 'root',
-  password: 'root',
-  database: 'tic',
-});
-
-
-const getScore = (username) => {
-  return 0; // fix db connection
-  connection.connect();
-
-  connection.query('SELECT * FROM users WHERE username = ?', [username], (error, results, fields) => {
-    if (error) {
-      console.log(error);
-    }
-    console.log('The solution is(userObj/score/username): ', results[0], results[0].score, results[0].username);
-  });
-
-  connection.end();
-
-  console.log('username is: ', username);
-};
-
-const storeUserData = (username, password, email) => {
-  const records = [
-    [username, password, email],
-  ];
-  connection.connect();
-
-  connection.query('INSERT INTO users (username, password, email) VALUES ?', [records], (error, results, fields) => {
-    if (error) throw error;
-  });
-
-  connection.end();
-};
-
-
-// ============================================================= //
 // ===================== handle auth github ==================== //
 // ============================================================= //
 
@@ -250,7 +204,9 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github').Strategy;
+// const mysql = require('mysql');
 const passportConfig = require('./config');
+const db = require('./db/queries.js');
 
 
 const app = express();
@@ -263,19 +219,23 @@ app.use(session({
   saveUninitialized: true,
 }));
 
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static('public'));
+
 
 passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, profile, cb) => {
   console.log('accessToken, refreshToken: ', accessToken, refreshToken);
   return cb(null, profile);
 }));
 
+
 passport.use(new LocalStrategy((username, password, done) => {
   console.log('LocalStrategy!!!: ', username, password, done);
   return done(null, username);
 }));
+
 
 passport.serializeUser((user, cb) => {
   cb(null, user);
@@ -284,20 +244,22 @@ passport.deserializeUser((user, cb) => {
   cb(null, user);
 });
 
+
 app.get('/', (req, res) => {
   console.log('req.body: ', req.body);
   if (req.user) {
-    getScore(req.user.username);
     res.sendFile(path.join(__dirname, '/views/index.html'));
   } else {
     res.sendFile(path.join(__dirname, '/views/login.html'));
   }
 });
 
+
 app.get('/login', (req, res) => {
   console.log('req.body: ', req.body);
   res.sendFile(path.join(__dirname, '/views/login.html'));
 });
+
 
 app.get('/register', (req, res) => {
   console.log('req.body: ', req.body);
@@ -312,10 +274,12 @@ app.get('/login-github',
   },
   passport.authenticate('github')); // username gets assigned to req.user(the session clears when the server restarts)
 
+
 app.get('/auth', passport.authenticate('github', {
   successRedirect: '/',
   failureRedirect: '/loginFailed',
 }));
+
 
 app.get('/session', (req, res) => {
   res.send(`My username from the session i: ${req.user.username}.<br>I'm logged in with GitHub!`);
@@ -329,7 +293,7 @@ app.post('/login-local', passport.authenticate('local', {
 
 
 app.post('/register-local', (req, res) => {
-  storeUserData(req.body.username, req.body.password, req.body.email);
+  db.storeUserData(req.body.username, req.body.password, req.body.email);
   res.redirect('/login');
 });
 
