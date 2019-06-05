@@ -5,16 +5,16 @@ const connection = mysql.createConnection({
   port: '3307',
   user: 'root',
   password: 'root',
-  database: 'github-users',
+  database: 'tic',
 });
 
 connection.connect();
 
-connection.query('SELECT * FROM users WHERE username = ?', ['s-gabor'], (error, results, fields) => {
+connection.query('SELECT * FROM users WHERE username = ?', ['sam'], (error, results, fields) => {
   if (error) {
     console.log(error);
   }
-  console.log('The solution is: ', results[0].score);
+  console.log('The solution is: ', results[0]);
 });
 
 connection.end();

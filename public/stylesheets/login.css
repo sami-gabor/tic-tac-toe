@@ -105,6 +105,16 @@ body {
 }
 
 .btn-github:hover {
-  color: white;
+  color: black;
   background-color: green;
+}
+
+.btn-facebook {
+  color: white;
+  background-color: #3b5998;
+}
+
+.btn-facebook:hover {
+  color: black;
+  background-color: #234080;
 }

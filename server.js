@@ -210,6 +210,7 @@ const connection = mysql.createConnection({
 
 
 const getScore = (username) => {
+  return 0; // fix db connection
   connection.connect();
 
   connection.query('SELECT * FROM users WHERE username = ?', [username], (error, results, fields) => {
@@ -234,11 +235,14 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github').Strategy;
 const passportConfig = require('./config');
 
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded());
 
 app.use(session({
   secret: 'Express is awesome!',
@@ -254,6 +258,12 @@ passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, prof
   return cb(null, profile);
 }));
 
+passport.use(new LocalStrategy((username, password, done) => {
+  console.log('LocalStrategy!!!: ', username, password, done);
+  return done(null, username);
+}
+));
+
 passport.serializeUser((user, cb) => {
   cb(null, user);
 });
@@ -262,6 +272,7 @@ passport.deserializeUser((user, cb) => {
 });
 
 app.get('/', (req, res) => {
+  console.log('req.body: ', req.body);
   if (req.user) {
     getScore(req.user.username);
     res.sendFile(path.join(__dirname, '/views/index.html'));
@@ -272,7 +283,7 @@ app.get('/', (req, res) => {
 
 app.get('/login',
   (req, res, next) => {
-    console.log('testing middleware...');
+    console.log('!!! testing middleware...');
     next();
   },
   passport.authenticate('github')); // username gets assigned to req.user(the session clears when the server restarts)
@@ -282,10 +293,15 @@ app.get('/auth', passport.authenticate('github', {
   failureRedirect: '/loginFailed',
 }));
 
-
 app.get('/session', (req, res) => {
   res.send(`My username from the session i: ${req.user.username}.<br>I'm logged in with GitHub!`);
 });
+
+
+app.post('/loginlocal', passport.authenticate('local', {
+  successRedirect: '/',
+  failureRedirect: '/login',
+}));
 
 
 app.listen(3000);
