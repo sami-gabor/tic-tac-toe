@@ -18,3 +18,4 @@ connection.query('SELECT * FROM users', (error, results, fields) => {
 });
 
 connection.end();
+

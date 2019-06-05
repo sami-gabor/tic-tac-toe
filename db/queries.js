@@ -19,7 +19,24 @@ const storeUserData = (username, password, email) => {
 const getScore = (username) => {
   connection.connect();
 
-  connection.query('SELECT * FROM users WHERE username = ?', [username], (error) => {
+  connection.query('SELECT * FROM users WHERE username = ?', [username], (error, result) => {
+    if (error) throw error;
+  });
+
+  connection.end();
+
+  // todo: return the request
+};
+
+
+const checkUser = (username, password) => {
+  const records = [
+    [username, password],
+  ];
+
+  connection.connect();
+
+  connection.query('SELECT username, password FROM users WHERE username = ? AND password = ?', [records], (error) => {
     if (error) throw error;
   });
 
@@ -27,4 +44,4 @@ const getScore = (username) => {
 };
 
 
-module.exports = { storeUserData, getScore };
+module.exports = { storeUserData, getScore, checkUser };

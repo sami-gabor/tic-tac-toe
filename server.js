@@ -233,6 +233,8 @@ passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, prof
 
 passport.use(new LocalStrategy((username, password, done) => {
   console.log('LocalStrategy!!!: ', username, password, done);
+  console.log(db.getScore(username, password));
+  // const hasAccess = db.checkUser(username, password);
   return done(null, username);
 }));
 
@@ -279,11 +281,6 @@ app.get('/auth', passport.authenticate('github', {
   successRedirect: '/',
   failureRedirect: '/loginFailed',
 }));
-
-
-app.get('/session', (req, res) => {
-  res.send(`My username from the session i: ${req.user.username}.<br>I'm logged in with GitHub!`);
-});
 
 
 app.post('/login-local', passport.authenticate('local', {
