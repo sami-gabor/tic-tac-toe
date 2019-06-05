@@ -281,9 +281,20 @@ app.get('/', (req, res) => {
   }
 });
 
-app.get('/login',
+app.get('/login', (req, res) => {
+  console.log('req.body: ', req.body);
+  res.sendFile(path.join(__dirname, '/views/login.html'));
+});
+
+app.get('/register', (req, res) => {
+  console.log('req.body: ', req.body);
+  res.sendFile(path.join(__dirname, '/views/login.html'));
+});
+
+
+app.get('/login-github',
   (req, res, next) => {
-    console.log('!!! testing middleware...');
+    console.log('!!! testing login middleware...');
     next();
   },
   passport.authenticate('github')); // username gets assigned to req.user(the session clears when the server restarts)
@@ -298,10 +309,14 @@ app.get('/session', (req, res) => {
 });
 
 
-app.post('/loginlocal', passport.authenticate('local', {
+app.post('/login-local', passport.authenticate('local', {
   successRedirect: '/',
   failureRedirect: '/login',
 }));
 
+app.post('/register-local', passport.authenticate('local', {
+  successRedirect: '/login',
+  failureRedirect: '/error',
+}));
 
 app.listen(3000);

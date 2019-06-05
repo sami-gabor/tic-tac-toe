@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="../public/stylesheets/login.css">
-    <!-- <link rel="stylesheet" type="text/css" href="../stylesheets/login.css"> -->
+    <link rel="stylesheet" type="text/css" href="../stylesheets/login.css">
     <title>Login Tic-Tac-Toe</title>
 </head>
     <body>
@@ -15,16 +15,17 @@
             <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
               <div class="card card-signin my-5">
                 <div class="card-body">
-                  <h5 class="card-title text-center">Sign In <bold class="font-weight-normal">Tic-Tac-Toe</bold> </h5>
+                  <h5 class="card-title text-center font-weight-normal""> Tic-Tac-Toe </h5>
+                  <h5 class="card-title text-center"> Sign In </h5>
 
-                  <form class="form-signin" action="http://localhost:3000/loginlocal" method="post">
+                  <form class="form-signin" action="http://localhost:3000/login-local" method="post">
                     <div class="form-label-group">
                       Username:
-                        <input type="text" name="username" placeholder="uname" class="form-control"/>
+                        <input type="text" name="username" placeholder="uname" class="form-control" required/>
                     </div>
                     <div class="form-label-group">
                       Password:
-                        <input type="password" name="password" placeholder="Pword" class="form-control"/>
+                        <input type="password" name="password" placeholder="Pword" class="form-control" required/>
                     </div>
                     <hr class="my-4">
                     <div>
@@ -32,7 +33,7 @@
                     </div>
                     <hr class="my-4">
 
-                    <a href="http://localhost:3000/login" class="btn btn-lg btn-github btn-block text-uppercase" type="submit"><i class="fab fa-github mr-2"></i> Sign in with GitHub </a>
+                    <a href="http://localhost:3000/login-github" class="btn btn-lg btn-github btn-block text-uppercase" type="submit"><i class="fab fa-github mr-2"></i> Sign in with GitHub </a>
 
                   </form>
 
