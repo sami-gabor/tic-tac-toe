@@ -204,6 +204,7 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github').Strategy;
+const bcrypt = require('bcrypt');
 // const mysql = require('mysql');
 const passportConfig = require('./config');
 const db = require('./db/queries.js');
@@ -290,7 +291,12 @@ app.post('/login-local', passport.authenticate('local', {
 
 
 app.post('/register-local', (req, res) => {
-  db.storeUserData(req.body.username, req.body.password, req.body.email);
+  const saltRounds = 10;
+  bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
+    console.log('hashed: ', hash);
+    db.storeUserData(req.body.username, hash, req.body.email);
+  });
+
   res.redirect('/login');
 });
 

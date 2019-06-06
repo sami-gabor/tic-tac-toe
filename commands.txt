@@ -18,7 +18,7 @@ docker rm $(docker ps -a -q)
 *** run mysql container
 docker run -it mysql -u root -proot
 
-$ docker exec -it some-mysql bash
+docker exec -it mysql bash
 
 *** open the mysql terminal
 mysql -u root -proot
