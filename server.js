@@ -234,9 +234,12 @@ passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, prof
 
 passport.use(new LocalStrategy((username, password, done) => {
   console.log('LocalStrategy!!!: ', username, password, done);
-  console.log(db.getScore(username, password));
-  // const hasAccess = db.checkUser(username, password);
-  return done(null, username);
+  // console.log(db.getScore(email, password));
+  const hasAccess = false;
+  if (hasAccess) {
+    return done(null, username);
+  }
+  return done(null, false);
 }));
 
 
@@ -249,24 +252,29 @@ passport.deserializeUser((user, cb) => {
 
 
 app.get('/', (req, res) => {
-  console.log('req.body: ', req.body);
+  console.log('req.body/: ', req.body, req.user);
   if (req.user) {
     res.sendFile(path.join(__dirname, '/views/index.html'));
   } else {
     res.sendFile(path.join(__dirname, '/views/login.html'));
   }
 });
+app.get('/local', (req, res) => {
+  console.log('req.body/local: ', req.user);
+
+  res.sendFile(path.join(__dirname, '/views/index.html'));
+});
 
 
 app.get('/login', (req, res) => {
-  console.log('req.body: ', req.body);
+  console.log('req.body/login: ', req.body);
   res.sendFile(path.join(__dirname, '/views/login.html'));
 });
 
 
 app.get('/register', (req, res) => {
-  console.log('req.body: ', req.body);
-  res.sendFile(path.join(__dirname, '/views/login.html'));
+  console.log('req.body/register: ', req.body);
+  res.sendFile(path.join(__dirname, '/views/register.html'));
 });
 
 
@@ -285,15 +293,18 @@ app.get('/auth', passport.authenticate('github', {
 
 
 app.post('/login-local', passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login',
+  successRedirect: '/local',
+  failureRedirect: '/register',
 }));
+
+app.post('/login-local', (req, res) => {
+  res.redirect('/local');
+});
 
 
 app.post('/register-local', (req, res) => {
   const saltRounds = 10;
   bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
-    console.log('hashed: ', hash);
     db.storeUserData(req.body.username, hash, req.body.email);
   });
 

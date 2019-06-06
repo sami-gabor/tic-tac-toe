@@ -11,23 +11,23 @@ const connection = mysql.createConnection({
 connection.connect();
 
 
-// connection.query('SELECT * FROM users', (error, results, fields) => {
-//   if (error) {
-//     console.log(error);
-//   }
-//   console.log('The users solution is: ', results);
-// });
-
+connection.query('SELECT * FROM users', (error, results, fields) => {
+  if (error) {
+    console.log(error);
+  }
+  console.log('The users are: ', results);
+});
 
 connection.query('SELECT * FROM tokens', (error, results, fields) => {
   if (error) {
     console.log(error);
   }
-  console.log('The tokens solution is: ', results);
+  console.log('The tokens are: ', results);
 });
 
-
-// connection.query('INSERT INTO tokens (hash, user_id) VALUES ("pass", (SELECT id FROM users WHERE email = "testtoken3@gmail.com"))', (error) => {
+// const hash = 'UvVQeCmHJOzYgxPhitmq.xQTRrC3ifQAlh0';
+// const email = 'testtoken2@gmail.com';
+// connection.query(`INSERT INTO tokens (hash, user_id) VALUES ("${hash}", (SELECT id FROM users WHERE email = "${email}"))`, (error) => {
 //   if (error) throw error;
 // });
 

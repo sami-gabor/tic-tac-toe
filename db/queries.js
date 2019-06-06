@@ -2,22 +2,26 @@ const connection = require('./connection.js');
 
 
 const storeUserData = (username, password, email) => {
-  // const results = [
-  //   [username, password, email],
-  // ];
   const results = [
-    [password, email],
+    [username, password, email],
   ];
 
   connection.connect();
 
-  // // id, username, email, password, score, joined
-  // connection.query('INSERT INTO users (username, password, email) VALUES ?', [user], (error) => {
-  //   if (error) throw error;
-  // });
+  // id, username, email, password, score, joined
+  connection.query('INSERT INTO users (username, password, email) VALUES ?', [results], (error) => {
+    if (error) throw error;
+  });
 
-  // id, hash, user_id
-  connection.query('INSERT INTO tokens (hash, user_id) VALUES (?, (SELECT id FROM users WHERE email = ?))', [results], (error) => {
+  connection.end();
+};
+
+
+const storeTokenData = (token, email) => {
+  connection.connect();
+
+  // id, token, user_id
+  connection.query(`INSERT INTO tokens (token, user_id) VALUES ("${token}", (SELECT id FROM users WHERE email = "${email}"))`, (error) => {
     if (error) throw error;
   });
 
@@ -53,4 +57,4 @@ const checkUser = (username, password) => {
 };
 
 
-module.exports = { storeUserData, getScore, checkUser };
+module.exports = { storeUserData, storeTokenData, getScore, checkUser };
