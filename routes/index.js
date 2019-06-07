@@ -7,7 +7,6 @@ const db = require('../db/queries.js');
 module.exports = (app) => {
   app.get('/', (req, res) => {
     // todo: check cookie token
-    console.log(222, req.user);
     if (req.user) {
       res.sendFile(path.join(__dirname, '../views/index.html'));
     } else {
@@ -15,16 +14,17 @@ module.exports = (app) => {
     }
   });
   app.get('/local', (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/index.html'));
+    res.redirect('/');
   });
 
 
   app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/login.html'));
+    res.redirect('/');
   });
 
   app.get('/logout', (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/login.html'));
+    req.logout();
+    res.redirect('/');
   });
 
 
