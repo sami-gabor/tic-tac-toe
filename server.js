@@ -199,13 +199,11 @@ server.on('connection', (socket) => {
 
 
 const express = require('express');
-const path = require('path');
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github').Strategy;
 const bcrypt = require('bcrypt');
-// const mysql = require('mysql');
 const passportConfig = require('./config');
 const db = require('./db/queries.js');
 
@@ -239,6 +237,7 @@ passport.use(new LocalStrategy((username, password, done) => {
 
     return bcrypt.compare(password, user[0].password, (error, res) => {
       if (!error && res) {
+        console.log(111, user);
         return done(null, user);
       }
       return done(null, false);
@@ -254,56 +253,7 @@ passport.deserializeUser((user, cb) => {
   cb(null, user);
 });
 
+require('./routes/index.js')(app);
 
-app.get('/', (req, res) => {
-  // todo: check cookie token
-  if (req.user) {
-    res.sendFile(path.join(__dirname, '/views/index.html'));
-  } else {
-    res.sendFile(path.join(__dirname, '/views/login.html'));
-  }
-});
-app.get('/local', (req, res) => {
-  res.sendFile(path.join(__dirname, '/views/index.html'));
-});
-
-
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, '/views/login.html'));
-});
-
-
-app.get('/register', (req, res) => {
-  res.sendFile(path.join(__dirname, '/views/register.html'));
-});
-
-
-app.get('/login-github',
-  (req, res, next) => {
-    next(); // optional middleware
-  },
-  passport.authenticate('github')); // username gets assigned to req.user(the session clears when the server restarts)
-
-
-app.get('/auth', passport.authenticate('github', {
-  successRedirect: '/',
-  failureRedirect: '/loginFailed',
-}));
-
-
-app.post('/login-local', passport.authenticate('local', {
-  successRedirect: '/local',
-  failureRedirect: '/loginFailed',
-}));
-
-
-app.post('/register-local', (req, res) => {
-  const saltRounds = 10;
-  bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
-    db.storeUserData(req.body.username, hash, req.body.email);
-  });
-
-  res.redirect('/login');
-});
 
 app.listen(3000);
