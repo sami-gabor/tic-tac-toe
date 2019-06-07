@@ -42,19 +42,11 @@ const getScore = (username) => {
 };
 
 
-const checkUser = (username, password) => {
-  const records = [
-    [username, password],
-  ];
-
-  connection.connect();
-
-  connection.query('SELECT username, password FROM users WHERE username = ? AND password = ?', [records], (error) => {
-    if (error) throw error;
-  });
-
-  connection.end();
+const findUser = (username, cb) => {
+  const query = `SELECT * FROM users WHERE email = '${username}'`;
+  console.log(query);
+  return connection.query(query, cb);
 };
 
 
-module.exports = { storeUserData, storeTokenData, getScore, checkUser };
+module.exports = { storeUserData, storeTokenData, getScore, findUser };

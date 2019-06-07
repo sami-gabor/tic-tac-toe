@@ -227,19 +227,23 @@ app.use(express.static('public'));
 
 
 passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, profile, cb) => {
-  console.log('accessToken, refreshToken: ', accessToken, refreshToken);
   return cb(null, profile);
 }));
 
 
 passport.use(new LocalStrategy((username, password, done) => {
-  console.log('LocalStrategy!!!: ', username, password, done);
-  // console.log(db.getScore(email, password));
-  const hasAccess = false;
-  if (hasAccess) {
-    return done(null, username);
-  }
-  return done(null, false);
+  db.findUser(username, (err, user) => {
+    if (err) {
+      return done(null, false);
+    }
+
+    return bcrypt.compare(password, user[0].password, (error, res) => {
+      if (!error && res) {
+        return done(null, user);
+      }
+      return done(null, false);
+    });
+  });
 }));
 
 
@@ -252,7 +256,7 @@ passport.deserializeUser((user, cb) => {
 
 
 app.get('/', (req, res) => {
-  console.log('req.body/: ', req.body, req.user);
+  // todo: check cookie token
   if (req.user) {
     res.sendFile(path.join(__dirname, '/views/index.html'));
   } else {
@@ -260,28 +264,23 @@ app.get('/', (req, res) => {
   }
 });
 app.get('/local', (req, res) => {
-  console.log('req.body/local: ', req.user);
-
   res.sendFile(path.join(__dirname, '/views/index.html'));
 });
 
 
 app.get('/login', (req, res) => {
-  console.log('req.body/login: ', req.body);
   res.sendFile(path.join(__dirname, '/views/login.html'));
 });
 
 
 app.get('/register', (req, res) => {
-  console.log('req.body/register: ', req.body);
   res.sendFile(path.join(__dirname, '/views/register.html'));
 });
 
 
 app.get('/login-github',
   (req, res, next) => {
-    console.log('!!! testing login middleware...');
-    next();
+    next(); // optional middleware
   },
   passport.authenticate('github')); // username gets assigned to req.user(the session clears when the server restarts)
 
@@ -294,12 +293,8 @@ app.get('/auth', passport.authenticate('github', {
 
 app.post('/login-local', passport.authenticate('local', {
   successRedirect: '/local',
-  failureRedirect: '/register',
+  failureRedirect: '/loginFailed',
 }));
-
-app.post('/login-local', (req, res) => {
-  res.redirect('/local');
-});
 
 
 app.post('/register-local', (req, res) => {

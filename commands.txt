@@ -6,11 +6,15 @@ docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3307:3306 -d mysql:5
 $ docker run -it --network some-network --rm mysql mysql -hsome-mysql -uexample-user -p
 docker run -it --network some-network --rm mysql mysql -hmysqll -uexample-user -p
 
-*** show all docker containers
-docker ps
+*** show active docker containers[all]
+docker ps [-a]
 
 *** stop a docker instance
 docker stop #...
+
+*** start a docker instance
+restart docker from windows
+docker start #...
 
 *** remove all docksr instances
 docker rm $(docker ps -a -q)

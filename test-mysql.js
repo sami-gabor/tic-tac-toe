@@ -25,11 +25,11 @@ connection.query('SELECT * FROM tokens', (error, results, fields) => {
   console.log('The tokens are: ', results);
 });
 
-// const hash = 'UvVQeCmHJOzYgxPhitmq.xQTRrC3ifQAlh0';
-// const email = 'testtoken2@gmail.com';
-// connection.query(`INSERT INTO tokens (hash, user_id) VALUES ("${hash}", (SELECT id FROM users WHERE email = "${email}"))`, (error) => {
-//   if (error) throw error;
-// });
+// // const hash = 'UvVQeCmHJOzYgxPhitmq.xQTRrC3ifQAlh0';
+// // const email = 'testtoken2@gmail.com';
+// // connection.query(`INSERT INTO tokens (hash, user_id) VALUES ("${hash}", (SELECT id FROM users WHERE email = "${email}"))`, (error) => {
+// //   if (error) throw error;
+// // });
 
 
 connection.end();
@@ -41,3 +41,19 @@ connection.end();
 // }
 // main().then();
 
+
+// const myFunction = async () => {
+//   const result = await connection.query('SELECT email FROM users');
+//   return result;
+// };
+
+// myFunction().then((result) => {
+//   // handle result
+//   console.log(result);
+// });
+
+
+// const myFunction = cb => connection.query('SELECT * FROM users WHERE username = "sam"', cb);
+// myFunction((err, res) => {
+//   console.log('ERROR/RES HERE: ', res[0].password);
+// });
