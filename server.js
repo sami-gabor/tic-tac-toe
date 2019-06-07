@@ -1,99 +1,82 @@
-const generateMatrix = (rows = 3, columns = 3) => {
-  const matrix = [];
+const express = require('express');
+const session = require('express-session');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const GitHubStrategy = require('passport-github').Strategy;
+const bcrypt = require('bcrypt');
+const io = require('socket.io');
+const generateName = require('sillyname');
 
-  const createRow = cols => new Array(cols).fill('');
-
-  for (let i = 0; i < rows; i += 1) {
-    matrix.push(createRow(columns));
-  }
-
-  return matrix;
-};
-const matrix = generateMatrix(3, 3);
+const passportConfig = require('./config');
+const db = require('./db/queries.js');
+const game = require('./utils.js');
 
 
-const checkRow = (rowIndex, currentSelection) => {
-  const selections = [];
+const app = express();
 
-  matrix[rowIndex].forEach((col) => {
-    if (col === currentSelection) {
-      selections.push(col);
+app.use(express.json());
+app.use(express.urlencoded());
+
+app.use(session({
+  secret: 'Express is awesome!',
+  resave: false,
+  saveUninitialized: true,
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(express.static('public'));
+
+
+require('./routes/index.js')(app);
+
+
+passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, profile, cb) => {
+  return cb(null, profile);
+}));
+
+passport.use(new LocalStrategy((username, password, done) => {
+  db.findUser(username, (err, user) => {
+    if (err) {
+      return done(null, false);
     }
+
+    return bcrypt.compare(password, user[0].password, (error, res) => {
+      if (!error && res) {
+        return done(null, user);
+      }
+      return done(null, false);
+    });
   });
+}));
 
-  return selections.length === matrix.length;
-};
+passport.serializeUser((user, cb) => {
+  cb(null, user);
+});
 
-
-const checkCol = (colIndex, currentSelection) => {
-  const selections = [];
-
-  matrix.forEach((row) => {
-    const cellToCheck = row[colIndex];
-    if (cellToCheck === currentSelection) {
-      selections.push(cellToCheck);
-    }
-  });
-
-  return selections.length === matrix.length;
-};
+passport.deserializeUser((user, cb) => {
+  cb(null, user);
+});
 
 
-const checkPrincipalDiagonal = (currentSelection) => {
-  const selections = [];
+app.listen(3000);
 
-  matrix.forEach((row, index) => {
-    const cellToCheck = row[index];
-    if (cellToCheck === currentSelection) {
-      selections.push(cellToCheck);
-    }
-  });
-
-  return selections.length === matrix.length;
-};
-
-
-const checkSecondaryDiagonal = (currentSelection) => {
-  const selections = [];
-
-  matrix.forEach((row, index) => {
-    const cellToCheck = row[matrix.length - index - 1];
-    if (cellToCheck === currentSelection) {
-      selections.push(cellToCheck);
-    }
-  });
-
-  return selections.length === matrix.length;
-};
-
-
-const checkWinner = ([rowIndex, colIndex], currentSelection) => {
-  if (checkRow(rowIndex, currentSelection)
-    || checkCol(colIndex, currentSelection)
-    || ((rowIndex === colIndex) && checkPrincipalDiagonal(currentSelection))
-    || ((parseInt(rowIndex, 10) + parseInt(colIndex, 10) === matrix.length - 1) && checkSecondaryDiagonal(currentSelection))) {
-    return true;
-  }
-
-  return false;
-};
-
-
-const updateMatrix = ([rowIndex, colIndex], clientSelection) => {
-  matrix[rowIndex][colIndex] = clientSelection;
-};
 
 // ============================================================= //
 // ====== handle communication channels with clients =========== //
 // ============================================================= //
 
-const io = require('socket.io');
-const generateName = require('sillyname');
 
+const matrix = game.generateMatrix(3, 3);
 const server = io.listen(8000);
 let currentMoveIsX = true;
 let movesCount = 0;
 const rooms = [];
+
+
+const updateMatrix = ([rowIndex, colIndex], clientSelection) => {
+  matrix[rowIndex][colIndex] = clientSelection;
+};
 
 const createRoom = (playerName, roomId) => {
   rooms.push({ roomId, namePlayerOne: playerName, namePlayerTwo: '' });
@@ -114,8 +97,8 @@ server.on('connection', (socket) => {
   socket.on('new room', (name, room) => {
     const playerName = name || generateName();
     const roomId = room || socket.id;
-
     createRoom(playerName, roomId);
+
     socket.join(roomId);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
     socket.emit('set room id hash and player name', roomId, playerName);
@@ -125,6 +108,7 @@ server.on('connection', (socket) => {
   socket.on('join room', (name, roomId) => {
     const playerName = name || generateName();
     let roomToJoin;
+
     for (let i = 0; i < rooms.length; i += 1) {
       if (rooms[i].roomId === roomId) {
         roomToJoin = rooms[i];
@@ -138,7 +122,6 @@ server.on('connection', (socket) => {
 
       socket.broadcast.to(roomId).emit('start game', matrix);
       socket.broadcast.to(roomId).emit('message', 'your first move');
-
       socket.emit('start game', matrix);
       socket.emit('freeze game', 'wait for player one\'s first move');
       socket.emit('set room id hash and player name', roomId, playerName);
@@ -162,8 +145,7 @@ server.on('connection', (socket) => {
     socket.broadcast.to(roomIdHash).emit('update game', cellIndex, cellValue); // broadcast message to everyone except the sender
     socket.broadcast.to(roomIdHash).emit('unfreeze game', 'It\'s your turn!');
 
-
-    if (checkWinner(cellIndex, cellValue)) {
+    if (game.checkWinner(matrix, cellIndex, cellValue)) {
       winner = cellValue;
       socket.broadcast.to(roomIdHash).emit('game over', `Player ${winner} won!`);
       socket.emit('game over', `Player ${winner} won!`);
@@ -191,69 +173,3 @@ server.on('connection', (socket) => {
 
   console.log(`${socket.id} has connected.`);
 });
-
-
-// ============================================================= //
-// ===================== handle auth github ==================== //
-// ============================================================= //
-
-
-const express = require('express');
-const session = require('express-session');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const GitHubStrategy = require('passport-github').Strategy;
-const bcrypt = require('bcrypt');
-const passportConfig = require('./config');
-const db = require('./db/queries.js');
-
-
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded());
-
-app.use(session({
-  secret: 'Express is awesome!',
-  resave: false,
-  saveUninitialized: true,
-}));
-
-
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(express.static('public'));
-
-
-passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, profile, cb) => {
-  return cb(null, profile);
-}));
-
-
-passport.use(new LocalStrategy((username, password, done) => {
-  db.findUser(username, (err, user) => {
-    if (err) {
-      return done(null, false);
-    }
-
-    return bcrypt.compare(password, user[0].password, (error, res) => {
-      if (!error && res) {
-        console.log(111, user);
-        return done(null, user);
-      }
-      return done(null, false);
-    });
-  });
-}));
-
-
-passport.serializeUser((user, cb) => {
-  cb(null, user);
-});
-passport.deserializeUser((user, cb) => {
-  cb(null, user);
-});
-
-require('./routes/index.js')(app);
-
-
-app.listen(3000);
