@@ -1,6 +1,7 @@
 const path = require('path');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const db = require('../db/queries.js');
 
 
@@ -23,6 +24,7 @@ module.exports = (app) => {
   });
 
   app.get('/logout', (req, res) => {
+    res.clearCookie('test');
     req.logout();
     res.redirect('/');
   });
@@ -53,10 +55,18 @@ module.exports = (app) => {
 
 
   app.post('/register-local', (req, res) => {
-    const saltRounds = 10;
-    bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
-      db.storeUserData(req.body.username, hash, req.body.email);
-    });
+    // // handle local register with bcrypt
+    // const saltRounds = 10;
+    // bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
+    //   db.storeUserData(req.body.username, hash, req.body.email);
+    // });
+
+
+    // handle local register with crypto
+    const secret = 'Express';
+    const hash = crypto.pbkdf2Sync(req.body.password, secret, 1000, 128, 'sha256').toString('hex');
+
+    db.storeUserData(req.body.username, hash, req.body.email);
 
     res.redirect('/login');
   });

@@ -6,37 +6,37 @@ const storeUserData = (username, password, email) => {
     [username, password, email],
   ];
 
-  connection.connect();
+  // connection.connect();
 
   // id, username, email, password, score, joined
   connection.query('INSERT INTO users (username, password, email) VALUES ?', [results], (error) => {
     if (error) throw error;
   });
 
-  connection.end();
+  // connection.end();
 };
 
 
 const storeTokenData = (token, email) => {
-  connection.connect();
+  // connection.connect();
 
   // id, token, user_id
   connection.query(`INSERT INTO tokens (token, user_id) VALUES ("${token}", (SELECT id FROM users WHERE email = "${email}"))`, (error) => {
     if (error) throw error;
   });
 
-  connection.end();
+  // connection.end();
 };
 
 
 const getScore = (username) => {
-  connection.connect();
+  // connection.connect();
 
   connection.query('SELECT * FROM users WHERE username = ?', [username], (error, result) => {
     if (error) throw error;
   });
 
-  connection.end();
+  // connection.end();
 
   // todo: return the request
 };
@@ -44,7 +44,6 @@ const getScore = (username) => {
 
 const findUser = (username, cb) => {
   const query = `SELECT * FROM users WHERE email = '${username}'`;
-  console.log(query);
   return connection.query(query, cb);
 };
 

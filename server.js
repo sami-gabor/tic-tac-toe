@@ -3,7 +3,8 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github').Strategy;
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const io = require('socket.io');
 const generateName = require('sillyname');
 
@@ -41,12 +42,21 @@ passport.use(new LocalStrategy((username, password, done) => {
       return done(null, false);
     }
 
-    return bcrypt.compare(password, user[0].password, (error, res) => {
-      if (!error && res) {
+    const secret = 'Express';
+
+    return crypto.pbkdf2(password, secret, 1000, 128, 'sha256', (error, derivedKey) => {
+      if (!error && derivedKey.toString('hex') === user[0].password) {
         return done(null, user);
       }
       return done(null, false);
     });
+
+    // return bcrypt.compare(password, user[0].password, (error, res) => {
+    //   if (!error && res) {
+    //     return done(null, user);
+    //   }
+    //   return done(null, false);
+    // });
   });
 }));
 
