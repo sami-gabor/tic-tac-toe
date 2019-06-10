@@ -8,22 +8,30 @@ const connection = mysql.createConnection({
   database: 'tic',
 });
 
-connection.connect();
+// connection.connect();
 
 
-connection.query('SELECT * FROM users', (error, results, fields) => {
-  if (error) {
-    console.log(error);
-  }
-  console.log('The users are: ', results);
-});
+// connection.query('SELECT * FROM users', (error, results, fields) => {
+//   if (error) {
+//     console.log(error);
+//   }
+//   console.log('The users are: ', results);
+// });
 
-connection.query('SELECT * FROM tokens', (error, results, fields) => {
+// connection.query('SELECT * FROM tokens WHERE id="7"', (error, results, fields) => {
+//   if (error) {
+//     console.log(error);
+//   }
+//   console.log('The tokens are: ', results);
+// });
+const token = '6ef668c168befd2592813745a8d0adcb82f1f2ed86c3a3952d5184cc05039b4bf37eabdaec279239e9feb15879375ee831cbcd96955ce6c3979de063f1504e840365cbed87100afca1275f4642314134856d098230560b97f24ffccf9c4431a06ec0ce21716f056149f0c9bb25995e21c4a5dd80882d7c7b5388780b012ae718';
+connection.query(`SELECT * FROM users JOIN tokens ON users.id = (SELECT user_id FROM tokens WHERE token = "${token}") ORDER BY tokens.id DESC LIMIT 1`, (error, results, fields) => {
   if (error) {
     console.log(error);
   }
   console.log('The tokens are: ', results);
 });
+
 
 // // const hash = 'UvVQeCmHJOzYgxPhitmq.xQTRrC3ifQAlh0';
 // // const email = 'testtoken2@gmail.com';
@@ -32,7 +40,7 @@ connection.query('SELECT * FROM tokens', (error, results, fields) => {
 // // });
 
 
-connection.end();
+// connection.end();
 
 
 

@@ -122,7 +122,6 @@ ioClient.on('freeze game', (message) => {
 });
 
 ioClient.on('unfreeze game', (message) => {
-  console.log(message);
   updateMessageField(message);
   addGameInputListener();
 });
@@ -133,4 +132,3 @@ ioClient.on('message', (message) => {
 });
 
 ioClient.on('disconnect', () => console.log('The server has disconnected!'));
-
