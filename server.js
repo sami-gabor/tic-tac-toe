@@ -12,6 +12,7 @@ const passportConfig = require('./config');
 const db = require('./db/queries.js');
 const game = require('./utils.js');
 
+const secret = 'Express is awoseme!'; // used to sign cookies
 
 const app = express();
 
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use(session({
-  secret: 'Express is awesome!',
+  secret,
   resave: false,
   saveUninitialized: true,
 }));
@@ -27,7 +28,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static('public'));
-app.use(cookieParser());
+app.use(cookieParser(secret));
 
 
 require('./routes/index.js')(app);

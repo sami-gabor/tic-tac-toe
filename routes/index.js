@@ -4,30 +4,24 @@ const crypto = require('crypto');
 const db = require('../db/queries.js');
 
 function ensureAuthMiddleware(req, res, next) {
-  const { token } = req.cookies;
+  const { token } = req.signedCookies; // retrive the token from cookies
 
   if (!token) {
     return res.redirect('/login');
   }
 
-  db.searchToken(token, (err, result) => { // result will have data from both tables(users and tokens)
+  // search db for token
+  db.searchToken(token, (err, result) => { // result will have data from both tables(users & tokens)
+    // if nothing found redirect
     if (err) {
       return res.redirect('/failed');
     }
+
     if (token === result[0].token) {
-      // req.user.currentUser = result;
+      // if found, query for user and store on req.user and call next() --> stored by passport-local
       next();
     }
   });
-
-  // search db for token
-  // if nothing found redirect
-  // if found, query for user and store on req.user and call next()
-
-  // if (token) {
-  //   next();
-  // }
-  next();
 }
 
 module.exports = (app) => {
@@ -67,12 +61,13 @@ module.exports = (app) => {
 
 
   app.post('/login-local',
-    passport.authenticate('local', { failureRedirect: '/logins' }),
-    (req, res) => {
-      const token = crypto.randomBytes(128).toString('hex');
+    passport.authenticate('local', { failureRedirect: '/failed' }),
+    (req, res) => { // req.user --> array of RowDataPacket
+      console.log('111', req.user)
 
+      const token = crypto.randomBytes(128).toString('hex');
       db.storeToken(token, req.user[0].id);
-      res.cookie('token', token);
+      res.cookie('token', token, { signed: true }); // store token to cookies
 
       res.redirect('/');
     });
