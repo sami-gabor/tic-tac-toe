@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const cookie = require('cookie');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github').Strategy;
@@ -76,7 +77,7 @@ app.listen(3000);
 // ============================================================= //
 
 
-const matrix = game.generateMatrix(3, 3);
+let matrix = game.generateMatrix(3, 3);
 const server = io.listen(8000);
 let currentMoveIsX = true;
 let movesCount = 0;
@@ -87,8 +88,8 @@ const updateMatrix = ([rowIndex, colIndex], clientSelection) => {
   matrix[rowIndex][colIndex] = clientSelection;
 };
 
-const createRoom = (playerName, roomId) => {
-  rooms.push({ roomId, namePlayerOne: playerName, namePlayerTwo: '' });
+const createRoom = (playerName, roomId, score) => {
+  rooms.push({ roomId, namePlayerOne: playerName, scorePlayerOne: score, namePlayerTwo: '', scorePlayerTwo: '' });
 };
 
 const nameIsTaken = (room, name) => {
@@ -96,44 +97,59 @@ const nameIsTaken = (room, name) => {
 };
 
 const roomIsFull = (room) => {
-  return Boolean(room.namePlayerTwo);
+  return Boolean(room.playerTwo.name);
+};
+
+const theRoom = {
+  id: 'tic',
+  playerOne: {
+    name: '',
+    score: 0,
+  },
+  playerTwo: {
+    name: '',
+    score: 0,
+  },
 };
 
 
 server.on('connection', (socket) => {
-  const playerId = socket.id;
+  const { token } = cookie.parse(socket.handshake.headers.cookie);
 
-  socket.on('new room', (name, room) => {
-    const playerName = name || generateName();
-    const roomId = room || socket.id;
-    createRoom(playerName, roomId);
+  // validate if token is valid
+  if (!token) {
+    // disconnect
+  }
 
-    socket.join(roomId);
-    socket.emit('wait player 2', 'Waiting for the second player to join.');
-    socket.emit('set room id hash and player name', roomId, playerName);
-    socket.broadcast.emit('room created', roomId);
+  let user;
+  db.getUserByToken(token, (err, result) => {
+    [user] = result;
   });
 
-  socket.on('join room', (name, roomId) => {
-    const playerName = name || generateName();
-    let roomToJoin;
 
-    for (let i = 0; i < rooms.length; i += 1) {
-      if (rooms[i].roomId === roomId) {
-        roomToJoin = rooms[i];
-        break;
-      }
-    }
+  const playerId = socket.id;
 
-    if (roomToJoin && !nameIsTaken(roomToJoin, playerName) && !roomIsFull(roomToJoin)) {
-      socket.join(roomId);
-      roomToJoin.namePlayerTwo = playerName;
+  socket.on('new room', (name, room) => { // create the first room
+    theRoom.id = room || socket.id;
+    theRoom.playerOne.name = name || user.username || user.github_username || generateName();
 
-      socket.broadcast.to(roomId).emit('start game', matrix);
-      socket.broadcast.to(roomId).emit('message', 'your first move');
+    socket.join(theRoom.id);
+    socket.emit('wait player 2', 'Waiting for the second player to join.');
+    socket.emit('load game stats', theRoom.id, theRoom.playerOne.name, user.score);
+    socket.broadcast.emit('room created', theRoom.id);
+  });
+
+  socket.on('join room', (name, roomId) => { // create the second room
+    if (!roomIsFull(theRoom)) {
+      socket.join(theRoom.id);
+      theRoom.playerTwo.name = name || user.username || user.github_username || generateName();
+
+      socket.broadcast.to(theRoom.id).emit('start game', matrix);
       socket.emit('start game', matrix);
+
+      socket.broadcast.to(theRoom.id).emit('message', 'your first move');
       socket.emit('freeze game', 'wait for player one\'s first move');
-      socket.emit('set room id hash and player name', roomId, playerName);
+      socket.emit('load game stats', theRoom.id, theRoom.playerTwo.name, user.score);
     } else {
       socket.emit('message', 'Invalid name and/or room ID');
     }
@@ -151,17 +167,41 @@ server.on('connection', (socket) => {
 
     socket.emit('update game', cellIndex, cellValue); // broadcast message back to sender
     socket.emit('freeze game', 'wait a second...');
-    socket.broadcast.to(roomIdHash).emit('update game', cellIndex, cellValue); // broadcast message to everyone except the sender
-    socket.broadcast.to(roomIdHash).emit('unfreeze game', 'It\'s your turn!');
+    socket.broadcast.to(theRoom.id).emit('update game', cellIndex, cellValue); // broadcast message to everyone except the sender
+    socket.broadcast.to(theRoom.id).emit('unfreeze game', 'It\'s your turn!');
 
     if (game.checkWinner(matrix, cellIndex, cellValue)) {
       winner = cellValue;
-      socket.broadcast.to(roomIdHash).emit('game over', `Player ${winner} won!`);
+      socket.broadcast.to(theRoom.id).emit('game over', `Player ${winner} won!`);
       socket.emit('game over', `Player ${winner} won!`);
+
+      const currentScore = user.score + 1;
+      db.updateScore(currentScore, user.user_id);
+
+      socket.emit('update score', currentScore);
+
+      db.getUserScores((error, result) => {
+        const users = [];
+        result.forEach(((user) => {
+          users.push({ name: user.username, score: user.score });
+        }));
+
+        socket.emit('ranking', users);
+        socket.broadcast.to(theRoom.id).emit('ranking', users);
+      });
     } else if (movesCount === 9) {
-      socket.broadcast.to(roomIdHash).emit('game over', 'It\'s a tie. Nobody won!');
+      socket.broadcast.to(theRoom.id).emit('game over', 'It\'s a tie. Nobody won!');
       socket.emit('game over', 'It\'s a tie. Nobody won!');
     }
+  });
+
+  socket.on('play again', () => {
+    socket.broadcast.to(theRoom.id).emit('message', '');
+
+    movesCount = 0;
+    matrix = game.generateMatrix(3, 3);
+    socket.emit('start game', matrix);
+    socket.broadcast.to(theRoom.id).emit('start game', matrix);
   });
 
   socket.on('disconnect', () => {

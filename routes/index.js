@@ -4,7 +4,8 @@ const crypto = require('crypto');
 const db = require('../db/queries.js');
 
 function ensureAuthMiddleware(req, res, next) {
-  const { token } = req.signedCookies; // retrive the token from cookies
+  // const { token } = req.signedCookies; // retrive the token from signed cookies
+  const { token } = req.cookies; // retrive the token from cookies
 
   if (!token) {
     return res.redirect('/login');
@@ -26,7 +27,8 @@ function ensureAuthMiddleware(req, res, next) {
 
 module.exports = (app) => {
   app.get('/', ensureAuthMiddleware, (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/index.html'));
+
+    res.sendFile(path.join(__dirname, '../views/index.html')); // [, dataforview]
   });
 
   app.get('/login', (req, res) => {
@@ -36,6 +38,8 @@ module.exports = (app) => {
   app.get('/failed', (req, res) => {
     res.send('<h2>Username and/or password are incorrect</h2>');
   });
+
+
 
   app.get('/logout', (req, res) => {
     res.clearCookie('token');
@@ -63,11 +67,13 @@ module.exports = (app) => {
   app.post('/login-local',
     passport.authenticate('local', { failureRedirect: '/failed' }),
     (req, res) => { // req.user --> array of RowDataPacket
-      console.log('111', req.user)
-
       const token = crypto.randomBytes(128).toString('hex');
+      const { score } = req.user[0];
+
       db.storeToken(token, req.user[0].id);
-      res.cookie('token', token, { signed: true }); // store token to cookies
+      // res.cookie('token', token, { signed: true }); // store signed token to cookies
+      res.cookie('token', token); // store token to cookies
+      res.cookie('score', score); // store score to cookies
 
       res.redirect('/');
     });

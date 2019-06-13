@@ -27,3 +27,8 @@ docker exec -it mysql bash
 *** open the mysql terminal
 mysql -u root -proot
 
+
+
+
+******************************** redis ****************************
+docker run --name my-redis -p 6379:6379 -d redis

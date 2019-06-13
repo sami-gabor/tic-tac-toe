@@ -3,6 +3,7 @@ const ioClient = io.connect('http://localhost:8000');
 
 function createTable(arr) {
   const $container = document.getElementById('container');
+  $container.innerHTML = '';
   const $table = document.createElement('table');
   const $tableBody = document.createElement('tbody');
   arr.forEach((row, rowIndex) => {
@@ -81,6 +82,36 @@ const addNewRoom = (roomId) => {
   });
 };
 
+const playAgain = () => {
+  ioClient.emit('play again');
+};
+
+const generatePlayAgainButton = () => {
+  const $gameOverContainer = document.getElementById('gameOver');
+  // $gameOverContainer.innerHTML = '';
+  const $button = document.createElement('button');
+  $button.appendChild(document.createTextNode('Play Again'));
+  $gameOverContainer.appendChild($button);
+
+  $button.addEventListener('click', playAgain);
+};
+
+const displayRanking = (users) => {
+  const $rankingContainer = document.getElementById('ranking');
+  const $h3 = document.createElement('h3');
+  $h3.appendChild(document.createTextNode('Ranking'));
+  $rankingContainer.appendChild($h3);
+
+  const $ol = document.createElement('ol');
+  users.forEach((user) => {
+    console.log(1, user)
+    const $li = document.createElement('li');
+    $li.appendChild(document.createTextNode(`${user.name}: ${user.score}`));
+    $ol.appendChild($li);
+  });
+  $rankingContainer.appendChild($ol);
+};
+
 
 // set up incomming communication channels
 ioClient.on('connect', () => {
@@ -102,9 +133,14 @@ ioClient.on('wait player 2', (message) => {
   updateMessageField(message);
 });
 
-ioClient.on('set room id hash and player name', (roomIdHash, playerName) => {
-  document.getElementById('room-id-hash').innerText = roomIdHash;
-  document.getElementById('player-name').innerText = playerName;
+ioClient.on('load game stats', (roomIdHash, playerName, playerScore) => {
+  document.getElementById('room-id-hash').innerText = `Room ID: ${roomIdHash}`;
+  document.getElementById('player-name').innerText = `Player name: ${playerName}`;
+  document.getElementById('player-score').innerText = `Score: ${playerScore}`;
+});
+
+ioClient.on('update score', (playerScore) => {
+  document.getElementById('player-score').innerText = `Score: ${playerScore}`;
 });
 
 ioClient.on('update game', (cellIndex, cellValue) => {
@@ -129,6 +165,11 @@ ioClient.on('unfreeze game', (message) => {
 
 ioClient.on('message', (message) => {
   updateMessageField(message);
+});
+
+ioClient.on('ranking', (users) => {
+  displayRanking(users);
+  console.log(users);
 });
 
 ioClient.on('disconnect', () => console.log('The server has disconnected!'));

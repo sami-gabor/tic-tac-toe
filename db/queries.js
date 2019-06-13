@@ -33,4 +33,29 @@ const searchToken = (token, cb) => {
 };
 
 
-module.exports = { storeUserData, storeToken, findUser, searchToken };
+const updateScore = (score, id) => {
+  connection.query(`UPDATE users SET score = ${score} WHERE id = ${id}`, (error) => {
+    if (error) throw error;
+  });
+};
+
+
+const getUserByToken = (token, cb) => {
+  const query = `
+    SELECT * FROM tokens AS t 
+    INNER JOIN users AS u ON t.user_id = u.id
+    WHERE t.token = "${token}" 
+  `;
+  return connection.query(query, cb);
+};
+
+
+const getUserScores = (cb) => {
+  const query = 'SELECT username, score FROM users ORDER BY score DESC LIMIT 3';
+  return connection.query(query, cb);
+};
+
+
+module.exports = {
+  storeUserData, storeToken, findUser, searchToken, updateScore, getUserByToken, getUserScores,
+};
