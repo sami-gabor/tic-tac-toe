@@ -96,7 +96,7 @@ const assignName = (name, user) => {
 };
 
 const theRoom = {
-  id: 'tic',
+  id: '-',
   playerOne: {
     name: '',
     score: 0,
@@ -118,7 +118,17 @@ server.on('connection', (socket) => {
 
   let currentUser;
   db.getUserByToken(token, (err, result) => {
-    [currentUser] = result;
+    currentUser = result;
+    db.getScores((err2, scoresList) => {
+      let rank = 0;
+      scoresList.forEach((item) => {
+        if (item.score >= currentUser[0].score) {
+          rank += 1;
+        }
+      });
+      currentUser.rank = rank;
+      socket.emit('load current user stats', theRoom.id, currentUser[0].username, currentUser[0].score, rank);
+    });
   });
 
 
@@ -175,7 +185,7 @@ server.on('connection', (socket) => {
 
       socket.emit('update score', currentScore);
 
-      db.getUserScores((error, result) => {
+      db.getUsernamesAndScores((error, result) => {
         const users = [];
         result.forEach(((user) => {
           users.push({ name: user.username, score: user.score });

@@ -27,7 +27,6 @@ function ensureAuthMiddleware(req, res, next) {
 
 module.exports = (app) => {
   app.get('/', ensureAuthMiddleware, (req, res) => {
-
     res.sendFile(path.join(__dirname, '../views/index.html')); // [, dataforview]
   });
 

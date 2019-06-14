@@ -50,12 +50,22 @@ const getUserByToken = (token, cb) => {
 };
 
 
-const getUserScores = (cb) => {
-  const query = 'SELECT username, score FROM users ORDER BY score DESC LIMIT 3';
+const getUsernamesAndScores = (cb) => {
+  const query = 'SELECT username, score FROM users ORDER BY score DESC';
+  return connection.query(query, cb);
+};
+
+const getScores = (cb) => {
+  const query = 'SELECT score FROM users ORDER BY score DESC';
+  return connection.query(query, cb);
+};
+
+const getUserRank = (score, cb) => {
+  const query = `SELECT score FROM users WHERE users.score >= ${score} ORDER BY score DESC`;
   return connection.query(query, cb);
 };
 
 
 module.exports = {
-  storeUserData, storeToken, findUser, searchToken, updateScore, getUserByToken, getUserScores,
+  storeUserData, storeToken, findUser, searchToken, updateScore, getUserByToken, getUsernamesAndScores, getScores,
 };

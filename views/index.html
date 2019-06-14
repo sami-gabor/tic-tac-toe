@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" src="../public/stylesheets/styles.css">
     <style>
         table * {
@@ -20,21 +22,57 @@
     <title>tic-tac-toe</title>
 </head>
 <body>
-    <a href="http://localhost:3000/logout">Log Out</a>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Tic-Tac-Toe</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Scoreboard
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">user 1</a>
+                            <!-- <div class="dropdown-divider"></div> -->
+                            <a class="dropdown-item" href="#">user 2</a>
+                            <a class="dropdown-item" href="#">user 3</a>
+                        </div>
+                    </li>
+                    
+                    
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="nav-item dropdown">
+                        <a id="player-name" class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            username
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                            <a id="room-id-hash" class="dropdown-item" href="#">Room no.</a>
+                            <a id="player-score" class="dropdown-item" href="#">Score</a>
+                            <a id="player-rank" class="dropdown-item" href="#">Rank</a>
+                            <a class="dropdown-item" href="#" id="navbarDropdown" role="button" data-toggle="modal" data-target="#howToPlayModal" aria-haspopup="true" aria-expanded="false">
+                                How to play
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="http://localhost:3000/logout" class="dropdown-item">Log Out</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
 
-    <h1>Tic - Tac - Toe</h1>
+
+    <!-- <a href="http://localhost:3000/logout">Log Out</a> -->
+
     
-    <h3><span> &nbsp; </span><span id="room-id-hash"></span></h3>
-    <h3><span> &nbsp; </span><span id="player-name"><!-- {{name}} --></span></h3>
-    <h3><span> &nbsp; </span><span id="player-score"></span></h3>
+    <h3><span> &nbsp; </span><span></span></h3>
+    <h3><span> &nbsp; </span><span><!-- {{name}} --></span></h3>
+    <h3><span> &nbsp; </span><span></span></h3>
     <div id="container" class="container">
         <div class="menu">
-          <h3>How To Play</h3>
-          <ol>
-              <li>Player 1: Create a new game by entering the username and room id(random ones are generated if left blank).</li>
-              <li>Player 2: Enter another username and the room id(or click on any of the available rooms).</li>
-              <li>Click on join game. </li>
-          </ol>
           <h4>Create a new Game</h4>
           <input type="text" name="name" id="nameNew" placeholder="Enter your name" >
           <input type="text" name="roomNew" id="roomNew" placeholder="Enter New Room ID" >
@@ -56,8 +94,58 @@
     <div id="gameOver">
         <div id="ranking"></div>
     </div>
+
+
+    <!-- Small modal: How To Play-->
+    <div class="modal" id="howToPlayModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4> <i class="fa fa-lock"></i>How To Play</h4>
+                </div>
+                <div class="modal-body">
+                    <p><i class="fa fa-question-circle"></i> Player 1: Create a new game by entering the username and room id(random ones are generated if left blank). <br /></p>
+                    <p><i class="fa fa-question-circle"></i> Player 2: Enter another username and the room id(or click on any of the available rooms). <br /></p>
+                    <p><i class="fa fa-question-circle"></i> Click on "Join Game"(or on any of the room IDs). <br /></p>
+                    
+                    <div class="row">
+                        <div class="col text-center">
+                            <button class="btn btn-default btn-primary" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Small modal: Log Out-->
+    <!-- <div class="modal" id="logoutModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4> <i class="fa fa-lock"></i></h4>
+                </div>
+                <div class="modal-body">
+                    <p><i class="fa fa-question-circle"></i> Are you sure you want to log-off? <br /></p>
+                <div class="actionsBtns">
+                    <div>
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                        <input type="submit" class="btn btn-default btn-primary" data-dismiss="modal" value="Logout" />
+                        <a href="http://localhost:3000/logout">out</a>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
     
     <script src="http://localhost:8000/socket.io/socket.io.js"></script>
     <script src="../javascripts/client.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>
