@@ -91,6 +91,10 @@ const roomIsFull = (room) => {
   return Boolean(room.playerTwo.name);
 };
 
+const assignName = (name, user) => {
+  return name || user.username || user.github_username || generateName();
+};
+
 const theRoom = {
   id: 'tic',
   playerOne: {
@@ -122,7 +126,7 @@ server.on('connection', (socket) => {
 
   socket.on('new room', (name, room) => { // create the first room
     theRoom.id = room || socket.id;
-    theRoom.playerOne.name = name || currentUser.username || currentUser.github_username || generateName();
+    theRoom.playerOne.name = assignName(name, currentUser);
 
     socket.join(theRoom.id);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
@@ -133,7 +137,7 @@ server.on('connection', (socket) => {
   socket.on('join room', (name) => { // create the second room
     if (!roomIsFull(theRoom)) {
       socket.join(theRoom.id);
-      theRoom.playerTwo.name = name || currentUser.username || currentUser.github_username || generateName();
+      theRoom.playerTwo.name = assignName(name, currentUser);
 
       socket.broadcast.to(theRoom.id).emit('start game', matrix);
       socket.emit('start game', matrix);
