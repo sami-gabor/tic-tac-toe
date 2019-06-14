@@ -81,19 +81,10 @@ let matrix = game.generateMatrix(3, 3);
 const server = io.listen(8000);
 let currentMoveIsX = true;
 let movesCount = 0;
-const rooms = [];
 
 
 const updateMatrix = ([rowIndex, colIndex], clientSelection) => {
   matrix[rowIndex][colIndex] = clientSelection;
-};
-
-const createRoom = (playerName, roomId, score) => {
-  rooms.push({ roomId, namePlayerOne: playerName, scorePlayerOne: score, namePlayerTwo: '', scorePlayerTwo: '' });
-};
-
-const nameIsTaken = (room, name) => {
-  return room.namePlayerOne === name;
 };
 
 const roomIsFull = (room) => {
@@ -121,9 +112,9 @@ server.on('connection', (socket) => {
     // disconnect
   }
 
-  let user;
+  let currentUser;
   db.getUserByToken(token, (err, result) => {
-    [user] = result;
+    [currentUser] = result;
   });
 
 
@@ -131,25 +122,25 @@ server.on('connection', (socket) => {
 
   socket.on('new room', (name, room) => { // create the first room
     theRoom.id = room || socket.id;
-    theRoom.playerOne.name = name || user.username || user.github_username || generateName();
+    theRoom.playerOne.name = name || currentUser.username || currentUser.github_username || generateName();
 
     socket.join(theRoom.id);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
-    socket.emit('load game stats', theRoom.id, theRoom.playerOne.name, user.score);
+    socket.emit('load game stats', theRoom.id, theRoom.playerOne.name, currentUser.score);
     socket.broadcast.emit('room created', theRoom.id);
   });
 
-  socket.on('join room', (name, roomId) => { // create the second room
+  socket.on('join room', (name) => { // create the second room
     if (!roomIsFull(theRoom)) {
       socket.join(theRoom.id);
-      theRoom.playerTwo.name = name || user.username || user.github_username || generateName();
+      theRoom.playerTwo.name = name || currentUser.username || currentUser.github_username || generateName();
 
       socket.broadcast.to(theRoom.id).emit('start game', matrix);
       socket.emit('start game', matrix);
 
       socket.broadcast.to(theRoom.id).emit('message', 'your first move');
       socket.emit('freeze game', 'wait for player one\'s first move');
-      socket.emit('load game stats', theRoom.id, theRoom.playerTwo.name, user.score);
+      socket.emit('load game stats', theRoom.id, theRoom.playerTwo.name, currentUser.score);
     } else {
       socket.emit('message', 'Invalid name and/or room ID');
     }
@@ -157,7 +148,7 @@ server.on('connection', (socket) => {
 
 
   // verify if the message reveived(obj) has the cellIndex property
-  socket.on('game input', (cellIndex, roomIdHash) => { // change roomIdHash with some hash
+  socket.on('game input', (cellIndex) => { // change roomIdHash with some hash
     let winner;
     movesCount += 1;
     // determine what the current cellValue is and update the matrix with it
@@ -175,8 +166,8 @@ server.on('connection', (socket) => {
       socket.broadcast.to(theRoom.id).emit('game over', `Player ${winner} won!`);
       socket.emit('game over', `Player ${winner} won!`);
 
-      const currentScore = user.score + 1;
-      db.updateScore(currentScore, user.user_id);
+      const currentScore = currentUser.score + 1;
+      db.updateScore(currentScore, currentUser.user_id);
 
       socket.emit('update score', currentScore);
 

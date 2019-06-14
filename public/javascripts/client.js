@@ -78,22 +78,8 @@ const addNewRoom = (roomId) => {
 
   $room.addEventListener('click', () => {
     document.getElementById('container').innerHTML = '';
-    ioClient.emit('join room', undefined, roomId);
+    ioClient.emit('join room');
   });
-};
-
-const playAgain = () => {
-  ioClient.emit('play again');
-};
-
-const generatePlayAgainButton = () => {
-  const $gameOverContainer = document.getElementById('gameOver');
-  // $gameOverContainer.innerHTML = '';
-  const $button = document.createElement('button');
-  $button.appendChild(document.createTextNode('Play Again'));
-  $gameOverContainer.appendChild($button);
-
-  $button.addEventListener('click', playAgain);
 };
 
 const displayRanking = (users) => {
@@ -104,7 +90,6 @@ const displayRanking = (users) => {
 
   const $ol = document.createElement('ol');
   users.forEach((user) => {
-    console.log(1, user)
     const $li = document.createElement('li');
     $li.appendChild(document.createTextNode(`${user.name}: ${user.score}`));
     $ol.appendChild($li);
@@ -169,7 +154,6 @@ ioClient.on('message', (message) => {
 
 ioClient.on('ranking', (users) => {
   displayRanking(users);
-  console.log(users);
 });
 
 ioClient.on('disconnect', () => console.log('The server has disconnected!'));
