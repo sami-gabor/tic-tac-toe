@@ -83,7 +83,7 @@ const addNewRoom = (roomId) => {
 };
 
 const displayRanking = (users) => {
-  const $rankingContainer = document.getElementById('ranking');
+  const $rankingContainer = document.getElementById('rankingList');
   const $h3 = document.createElement('h3');
   $h3.appendChild(document.createTextNode('Ranking'));
   $rankingContainer.appendChild($h3);
@@ -96,6 +96,13 @@ const displayRanking = (users) => {
   });
   $rankingContainer.appendChild($ol);
 };
+
+const displayUserStats = (user, room = '') => {
+  document.getElementById('room-id-hash').innerText = `Room: ${room}`;
+  document.getElementById('player-name').innerText = `Hello, ${user.username}`;
+  document.getElementById('player-score').innerText = `Score: ${user.score}`;
+  document.getElementById('player-rank').innerText = `Rank: ${user.rank}`;
+}
 
 
 // set up incomming communication channels
@@ -118,17 +125,12 @@ ioClient.on('wait player 2', (message) => {
   updateMessageField(message);
 });
 
-ioClient.on('load current user stats', (roomIdHash, playerName, playerScore, playerRank) => {
-  document.getElementById('player-name').innerText = playerName;
-  document.getElementById('room-id-hash').innerText = `Room1: ${roomIdHash}`;
-  document.getElementById('player-score').innerText = `Score1: ${playerScore}`;
-  document.getElementById('player-rank').innerText = `Rank1: ${playerRank}`;
+ioClient.on('user stats on connection', (user) => {
+  displayUserStats(user);
 });
 
-ioClient.on('load game stats', (roomIdHash, playerName, playerScore) => {
-  document.getElementById('room-id-hash').innerText = `Room: ${roomIdHash}`;
-  document.getElementById('player-name').innerText = playerName;
-  document.getElementById('player-score').innerText = `Score: ${playerScore}`;
+ioClient.on('update user stats', (user, room) => {
+  displayUserStats(user, room);
 });
 
 ioClient.on('update score', (playerScore) => {

@@ -127,9 +127,9 @@ server.on('connection', (socket) => {
           rank += 1;
         }
       });
-      
+
       currentUser.rank = rank;
-      socket.emit('load current user stats', theRoom.id, currentUser.username, currentUser.score, rank);
+      socket.emit('user stats on connection', currentUser);
     });
   });
 
@@ -142,7 +142,7 @@ server.on('connection', (socket) => {
 
     socket.join(theRoom.id);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
-    socket.emit('load game stats', theRoom.id, theRoom.playerOne.name, currentUser.score);
+    socket.emit('update user stats', currentUser, theRoom.id);
     socket.broadcast.emit('room created', theRoom.id);
   });
 
@@ -156,7 +156,7 @@ server.on('connection', (socket) => {
 
       socket.broadcast.to(theRoom.id).emit('message', 'your first move');
       socket.emit('freeze game', 'wait for player one\'s first move');
-      socket.emit('load game stats', theRoom.id, theRoom.playerTwo.name, currentUser.score);
+      socket.emit('update user stats', currentUser, theRoom.id);
     } else {
       socket.emit('message', 'Invalid name and/or room ID');
     }
