@@ -180,7 +180,7 @@ server.on('connection', (socket) => {
     if (game.checkWinner(matrix, cellIndex, cellValue)) {
       winner = cellValue;
       socket.broadcast.to(theRoom.id).emit('game over', `Player ${winner} won!`);
-      socket.emit('game over', `Player ${winner} won!`);
+      socket.emit('game over', `${winner} wins!`);
 
       const currentScore = currentUser.score + 1;
 

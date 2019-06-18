@@ -16,3 +16,7 @@ td {
 h1 {
     color: red;
 }
+
+.container-rooms {
+    border: 2px solid red;
+}

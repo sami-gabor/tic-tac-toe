@@ -18,6 +18,20 @@
             text-align: center;
             font-size: 32px;
         }
+        .hidden {
+            display: none;
+        }
+
+        .container-rooms {
+            border: 2px solid red;
+        }
+        .container-user-input {
+            min-width: 350px;
+        }
+        .container-active-rooms {
+            /* border: 2px solid red; */
+            width: 50%;
+        }
     </style>
     <title>tic-tac-toe</title>
 </head>
@@ -64,25 +78,54 @@
         </div>
     </nav>
 
-    <div id="container" class="container">
-        <div class="menu">
-          <h4>Create a new Game</h4>
-          <input type="text" name="name" id="nameNew" placeholder="Enter your name" >
-          <input type="text" name="roomNew" id="roomNew" placeholder="Enter New Room ID" >
-          <button id="new">New Game</button>
-          <br><br>
-          <h4>Join an existing game</h4>
-          <input type="text" name="name" id="nameJoin" placeholder="Enter your name" >
-          <input type="text" name="roomJoin" id="roomJoin" placeholder="Enter Active Room ID" >
-          <button id="join">Join Game</button>
+    <div id="container" class="row d-flex justify-content-center">
+        <div class="container-user-input card text-center m-5 shadow-sm mb-5 bg-white rounded">
+            <div class="card-header">
+                Create a new Game
+            </div>
+            <div class="card-body">
+                <input type="text" aria-label="username" class="form-control m-1" name="name" id="nameNew" placeholder="Username">
+                <input type="text" aria-label="room" class="form-control m-1" name="roomNew" id="roomNew" placeholder="Room id">
+                <button id="new" type="button" class="btn btn-primary m-1">New Game</button>
+            </div>
         </div>
-        <div>
-            <h4>Active rooms:</h4>
-            <ul id="rooms"></ul>
+
+        <div class="container-user-input card text-center m-5 shadow-sm mb-5 bg-white rounded">
+            <div class="card-header">
+                    Join an existing game
+            </div>
+            <div class="card-body">
+                <input type="text" aria-label="username" class="form-control m-1" name="name" id="nameNew" placeholder="Username">
+                <input type="text" aria-label="room" class="form-control m-1" name="roomJoin" id="roomJoin" placeholder="Room id">
+                <button id="join" type="button" class="btn btn-primary m-1">Join Game</button>
+            </div>
         </div>
     </div>
+    
 
-    <h3 id="messages"></h3>
+    <div id="activeRooms">
+        <div class="d-flex justify-content-center">
+            <div class="container-active-rooms card text-center m-5 shadow-sm mb-5 bg-white rounded">
+                <div class="card-header">
+                    Active Rooms
+                </div>
+                <div class="card-body">
+                    <ul id="rooms"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+          
+    <div id="messageBox" class="hidden">
+        <div class="d-flex justify-content-center">
+            <div class="container-active-rooms card text-center m-5 shadow-sm mb-5 bg-white rounded">
+                <div id="messageText" class="card-header">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    
 
     <div id="gameOver">
         <div id="rankingList"></div>

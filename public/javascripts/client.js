@@ -23,7 +23,7 @@ function createTable(arr) {
 
 
 const updateMessageField = (message) => {
-  const $message = document.getElementById('messages');
+  const $message = document.getElementById('messageText');
   $message.innerHTML = message;
 };
 
@@ -52,6 +52,10 @@ const $newGameButton = document.getElementById('new');
 $newGameButton.addEventListener('click', () => {
   const playerName = document.getElementById('nameNew').value;
   const roomId = document.getElementById('roomNew').value;
+
+  document.getElementById('activeRooms').classList.add('hidden');
+  document.getElementById('messageBox').classList.remove('hidden');
+
   ioClient.emit('new room', playerName, roomId);
 });
 
@@ -77,6 +81,8 @@ const addNewRoom = (roomId) => {
   $roomsList.appendChild($room);
 
   $room.addEventListener('click', () => {
+    document.getElementById('activeRooms').classList.add('hidden');
+    document.getElementById('messageBox').classList.remove('hidden');
     document.getElementById('container').innerHTML = '';
     ioClient.emit('join room');
   });
