@@ -120,14 +120,13 @@ ioClient.on('wait player 2', (message) => {
 
 ioClient.on('load current user stats', (roomIdHash, playerName, playerScore, playerRank) => {
   document.getElementById('player-name').innerText = playerName;
-  document.getElementById('room-id-hash').innerText = `Room: ${roomIdHash}`;
-  document.getElementById('player-score').innerText = `Score: ${playerScore}`;
-  document.getElementById('player-rank').innerText = `Rank: ${playerRank}`;
-  console.log(roomIdHash, playerName, playerScore, playerRank)
+  document.getElementById('room-id-hash').innerText = `Room1: ${roomIdHash}`;
+  document.getElementById('player-score').innerText = `Score1: ${playerScore}`;
+  document.getElementById('player-rank').innerText = `Rank1: ${playerRank}`;
 });
 
 ioClient.on('load game stats', (roomIdHash, playerName, playerScore) => {
-  document.getElementById('room-id-hash').innerText = `RoomID: ${roomIdHash}`;
+  document.getElementById('room-id-hash').innerText = `Room: ${roomIdHash}`;
   document.getElementById('player-name').innerText = playerName;
   document.getElementById('player-score').innerText = `Score: ${playerScore}`;
 });
