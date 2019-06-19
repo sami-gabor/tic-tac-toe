@@ -196,9 +196,6 @@ server.on('connection', (socket) => {
         result.forEach(((user) => {
           users.push({ name: user.username, score: user.score });
         }));
-
-        socket.emit('ranking', users);
-        socket.broadcast.to(theRoom.id).emit('ranking', users);
       });
     } else if (movesCount === 9) {
       socket.broadcast.to(theRoom.id).emit('game over', 'It\'s a tie. Nobody won!');

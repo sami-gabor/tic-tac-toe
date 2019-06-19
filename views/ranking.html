@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Ranking</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <style>
+        .card {
+            min-width: 300px;
+            width: 30%;
+        }
+    </style>
+
+    <script>
+        const displayRanking = () => {
+            const $rankingContainer = document.getElementById('rankingList');
+            fetch("http://localhost:3000/users")
+                .then(response => response.json())
+                .then(users => {
+                    users.forEach((user) => {
+                        const $p = document.createElement('p');
+                        $p.setAttribute("class", "card-text");
+                        $p.appendChild(document.createTextNode(`${user.username}: ${user.score}`));
+                        $rankingContainer.appendChild($p);
+                    });
+                })
+        };
+    </script>
+</head>
+
+<body onload="displayRanking()">
+    <div class="card-container d-flex justify-content-center mt-5">
+        <div class="card text-center shadow-sm mb-5 bg-white rounded">
+            <div class="card-header">
+                <h4>Ranking</h4>
+            </div>
+            <div id="rankingList" class="card-body">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

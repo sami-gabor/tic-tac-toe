@@ -49,9 +49,20 @@ module.exports = (app) => {
     res.sendFile(path.join(__dirname, '../views/register.html'));
   });
 
+  app.get('/ranking', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/ranking.html'));
+  });
+
+  app.get('/users', (req, res) => {
+    db.getUsernamesAndScores((err, result) => {
+      res.json(result);
+    });
+  });
+
 
   app.get('/login-github',
     (req, res, next) => {
+      console.log('dasda', req.user);
       next(); // optional middleware
     },
     passport.authenticate('github')); // username gets assigned to req.user(the session clears when the server restarts)

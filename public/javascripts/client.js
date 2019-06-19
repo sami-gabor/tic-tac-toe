@@ -6,16 +6,20 @@ function createTable(arr) {
   $container.innerHTML = '';
   const $table = document.createElement('table');
   const $tableBody = document.createElement('tbody');
+
   arr.forEach((row, rowIndex) => {
     const $tableRow = document.createElement('tr');
+
     row.forEach((col, colIndex) => {
       const $tableData = document.createElement('td');
       $tableData.setAttribute('id', `${rowIndex}${colIndex}`);
       $tableData.appendChild(document.createTextNode(col));
       $tableRow.appendChild($tableData);
     });
+
     $tableBody.appendChild($tableRow);
   });
+
   $table.appendChild($tableBody);
   $container.innerHTML = '';
   $container.appendChild($table);
@@ -30,8 +34,9 @@ const updateMessageField = (message) => {
 
 const updateGameBoard = (cellIndex, currentPlayerSelection) => {
   const $cell = document.getElementById(cellIndex);
-  $cell.innerHTML = currentPlayerSelection;
   const classes = $cell.classList;
+  $cell.innerHTML = currentPlayerSelection;
+
   if (!classes.contains('selected')) {
     $cell.classList.add('selected');
   }
@@ -46,6 +51,7 @@ const handleGameClick = (e) => {
   if (!classes.contains('selected')) {
     $cell.classList.add('selected');
     const roomIdHash = document.getElementById('room-id-hash').innerText;
+
     ioClient.emit('game input', cellIndex, roomIdHash); // change roomId with some hash
   }
 };
@@ -62,7 +68,6 @@ const $newGameButton = document.getElementById('new');
 $newGameButton.addEventListener('click', () => {
   const playerName = document.getElementById('nameNew').value;
   const roomId = document.getElementById('roomNew').value;
-
   document.getElementById('activeRooms').classList.add('hidden');
   document.getElementById('messageBox').classList.remove('hidden');
 
@@ -74,6 +79,7 @@ const $joinGameButton = document.getElementById('join');
 $joinGameButton.addEventListener('click', () => {
   const playerName = document.getElementById('nameJoin').value;
   const roomId = document.getElementById('roomJoin').value;
+
   ioClient.emit('join room', playerName, roomId);
 });
 
@@ -94,23 +100,9 @@ const addNewRoom = (roomId) => {
     document.getElementById('activeRooms').classList.add('hidden');
     document.getElementById('messageBox').classList.remove('hidden');
     document.getElementById('container').innerHTML = '';
+
     ioClient.emit('join room');
   });
-};
-
-const displayRanking = (users) => {
-  const $rankingContainer = document.getElementById('rankingList');
-  const $h3 = document.createElement('h3');
-  $h3.appendChild(document.createTextNode('Ranking'));
-  $rankingContainer.appendChild($h3);
-
-  const $ol = document.createElement('ol');
-  users.forEach((user) => {
-    const $li = document.createElement('li');
-    $li.appendChild(document.createTextNode(`${user.name}: ${user.score}`));
-    $ol.appendChild($li);
-  });
-  $rankingContainer.appendChild($ol);
 };
 
 const displayUserStats = (user, room = '') => {
@@ -118,7 +110,7 @@ const displayUserStats = (user, room = '') => {
   document.getElementById('player-name').innerText = `Hello, ${user.username}`;
   document.getElementById('player-score').innerText = `Score: ${user.score}`;
   document.getElementById('player-rank').innerText = `Rank: ${user.rank}`;
-}
+};
 
 
 // set up incomming communication channels
@@ -175,10 +167,6 @@ ioClient.on('unfreeze game', (message) => {
 
 ioClient.on('message', (message) => {
   updateMessageField(message);
-});
-
-ioClient.on('ranking', (users) => {
-  displayRanking(users);
 });
 
 ioClient.on('disconnect', () => console.log('The server has disconnected!'));
