@@ -66,23 +66,12 @@ const freezeBoardGame = () => {
 // create a room and automatically add the player to it
 const $newGameButton = document.getElementById('new');
 $newGameButton.addEventListener('click', () => {
-  const playerName = document.getElementById('nameNew').value;
   const roomId = document.getElementById('roomNew').value;
   document.getElementById('activeRooms').classList.add('hidden');
   document.getElementById('messageBox').classList.remove('hidden');
 
-  ioClient.emit('new room', playerName, roomId);
+  ioClient.emit('new room', roomId);
 });
-
-// send the player name(from the input field) to server
-const $joinGameButton = document.getElementById('join');
-$joinGameButton.addEventListener('click', () => {
-  const playerName = document.getElementById('nameJoin').value;
-  const roomId = document.getElementById('roomJoin').value;
-
-  ioClient.emit('join room', playerName, roomId);
-});
-
 
 const addGameInputListener = () => {
   // send the game input(from the board game) to server
