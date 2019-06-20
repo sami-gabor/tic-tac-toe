@@ -13,8 +13,7 @@ const passportConfig = require('./config');
 const db = require('./db/queries.js');
 const game = require('./utils.js');
 
-const secret = 'Express is awoseme!'; // used to sign cookies
-
+const secret = 'Express is awesome!'; // used to sign cookies
 const app = express();
 
 app.use(express.json());
@@ -48,8 +47,6 @@ passport.use(new LocalStrategy((username, password, done) => {
     if (!user) {
       return done(null, false);
     }
-
-    const secret = 'Express';
 
     return crypto.pbkdf2(password, secret, 1000, 128, 'sha256', (error, derivedKey) => {
       if (!error && derivedKey.toString('hex') === user[0].password) {

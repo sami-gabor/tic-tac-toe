@@ -3,6 +3,8 @@ const passport = require('passport');
 const crypto = require('crypto');
 const db = require('../db/queries.js');
 
+const secret = 'Express is awesome!';
+
 function ensureAuthMiddleware(req, res, next) {
   // const { token } = req.signedCookies; // retrive the token from signed cookies
   const { token } = req.cookies; // retrive the token from cookies
@@ -89,7 +91,6 @@ module.exports = (app) => {
 
 
   app.post('/register-local', (req, res) => {
-    const secret = 'Express';
     const hash = crypto.pbkdf2Sync(req.body.password, secret, 1000, 128, 'sha256').toString('hex');
 
     db.storeUserData(req.body.username, hash, req.body.email);
