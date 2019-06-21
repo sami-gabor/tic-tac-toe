@@ -67,18 +67,32 @@ module.exports = (app) => {
 
   app.get('/auth', passport.authenticate('github', { failureRedirect: '/failed' }),
     (req, res) => {
-      const token = crypto.randomBytes(128).toString('hex');
-      res.cookie('token', token); // store token to cookies
-      res.redirect('/');
+      const { username } = req.user;
+      const password = crypto.randomBytes(128).toString('hex');
+      const email = req.user.emails[0].value;
+
+      db.getUserByEmail(email, (error, result) => {
+        const token = crypto.randomBytes(128).toString('hex');
+
+        if (result[0].username === req.user.username) {
+          db.storeToken(token, result[0].id);
+        } else {
+          db.storeUserData(username, password, email);
+        }
+
+        res.cookie('token', token);
+        res.redirect('/');
+      });
     });
 
 
   app.post('/login-local',
     passport.authenticate('local', { failureRedirect: '/failed' }),
+
     (req, res) => { // req.user --> array of RowDataPacket
       const token = crypto.randomBytes(128).toString('hex');
       db.storeToken(token, req.user[0].id);
-      res.cookie('token', token); // store token to cookies
+      res.cookie('token', token);
       res.redirect('/');
     });
 

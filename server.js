@@ -39,7 +39,7 @@ passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, prof
 }));
 
 passport.use(new LocalStrategy((username, password, done) => {
-  db.findUser(username, (err, user) => {
+  db.getUserByEmail(username, (err, user) => {
     if (err) {
       return done(null, false);
     }
@@ -116,6 +116,7 @@ server.on('connection', (socket) => {
   let currentUser;
   db.getUserByToken(token, (err, result) => {
     [currentUser] = result;
+
     db.getScores((err2, scoresList) => {
       let rank = 0;
 

@@ -21,7 +21,7 @@ const storeToken = (token, id) => {
 };
 
 
-const findUser = (username, cb) => {
+const getUserByEmail = (username, cb) => {
   const query = `SELECT * FROM users WHERE email = '${username}' LIMIT 1`;
   return connection.query(query, cb)[0];
 };
@@ -67,5 +67,5 @@ const getUserRank = (score, cb) => {
 
 
 module.exports = {
-  storeUserData, storeToken, findUser, searchToken, updateScore, getUserByToken, getUsernamesAndScores, getScores,
+  storeUserData, storeToken, getUserByEmail, searchToken, updateScore, getUserByToken, getUsernamesAndScores, getScores,
 };
