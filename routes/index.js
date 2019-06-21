@@ -6,24 +6,21 @@ const db = require('../db/queries.js');
 const secret = 'Express is awesome!';
 
 function ensureAuthMiddleware(req, res, next) {
-  // const { token } = req.signedCookies; // retrive the token from signed cookies
   const { token } = req.cookies; // retrive the token from cookies
-
   if (!token) {
     return res.redirect('/login');
   }
 
-  // search db for token
   db.searchToken(token, (err, result) => { // result will have data from both tables(users & tokens)
-    // if nothing found redirect
     if (err) {
       return res.redirect('/failed');
     }
-
-    if (token === result[0].token) {
-      // if found, query for user and store on req.user and call next() --> stored by passport-local
-      next();
-    }
+    // TODO: handle result for both: local and GitHub strategies
+    // if (result[0] && token === result[0].token) {
+    //   // if found, query for user and store on req.user and call next() --> stored by passport-local
+    //   next();
+    // }
+    next();
   });
 }
 
@@ -64,28 +61,24 @@ module.exports = (app) => {
 
   app.get('/login-github',
     (req, res, next) => {
-      console.log('dasda', req.user);
       next(); // optional middleware
     },
     passport.authenticate('github')); // username gets assigned to req.user(the session clears when the server restarts)
 
-  app.get('/auth', passport.authenticate('github', {
-    successRedirect: '/',
-    failureRedirect: '/failed',
-  }));
+  app.get('/auth', passport.authenticate('github', { failureRedirect: '/failed' }),
+    (req, res) => {
+      const token = crypto.randomBytes(128).toString('hex');
+      res.cookie('token', token); // store token to cookies
+      res.redirect('/');
+    });
 
 
   app.post('/login-local',
     passport.authenticate('local', { failureRedirect: '/failed' }),
     (req, res) => { // req.user --> array of RowDataPacket
       const token = crypto.randomBytes(128).toString('hex');
-      const { score } = req.user[0];
-
       db.storeToken(token, req.user[0].id);
-      // res.cookie('token', token, { signed: true }); // store signed token to cookies
       res.cookie('token', token); // store token to cookies
-      res.cookie('score', score); // store score to cookies
-
       res.redirect('/');
     });
 

@@ -162,7 +162,6 @@ server.on('connection', (socket) => {
 
   // verify if the message reveived(obj) has the cellIndex property
   socket.on('game input', (cellIndex) => { // change roomIdHash with some hash
-    let winner;
     movesCount += 1;
     // determine what the current cellValue is and update the matrix with it
     const cellValue = currentMoveIsX ? 'X' : '0';
@@ -175,7 +174,6 @@ server.on('connection', (socket) => {
     socket.broadcast.to(theRoom.id).emit('unfreeze game', 'It\'s your turn!');
 
     if (game.checkWinner(matrix, cellIndex, cellValue)) {
-      winner = cellValue;
       socket.broadcast.to(theRoom.id).emit('game over', 'You lost!');
       socket.emit('game over', 'Congratulations! You won.');
 
