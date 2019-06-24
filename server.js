@@ -92,16 +92,33 @@ const assignName = (user) => {
   return user.username || user.github_username || generateName();
 };
 
-const theRoom = {
-  id: '-',
-  playerOne: {
-    name: '',
-    score: 0,
-  },
-  playerTwo: {
-    name: '',
-    score: 0,
-  },
+const rooms = [];
+
+const createNewRoom = (roomName, user) => {
+  const room = {
+    id: roomName,
+    playerOne: {
+      name: assignName(user),
+      score: 0,
+    },
+    playerTwo: {
+      name: '',
+      score: 0,
+    },
+  };
+
+  return room;
+};
+
+const findRoom = (roomName) => {
+  let result;
+  rooms.forEach((room) => {
+    if (room.id === roomName) {
+      result = room;
+    }
+  });
+
+  return result;
 };
 
 
@@ -134,48 +151,51 @@ server.on('connection', (socket) => {
 
   const playerId = socket.id;
 
-  socket.on('new room', (room) => { // create the first room
-    theRoom.id = room || socket.id;
-    theRoom.playerOne.name = assignName(currentUser);
+  socket.on('new room', (roomNameParam) => {
+    const roomName = roomNameParam || socket.id;
+    const newRoom = createNewRoom(roomName, currentUser);
+    rooms.push(newRoom);
 
-    socket.join(theRoom.id);
+    socket.join(newRoom.id);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
-    socket.emit('update user stats', currentUser, theRoom.id);
-    socket.broadcast.emit('room created', theRoom.id);
+    socket.emit('update user stats', currentUser, newRoom.id);
+    socket.broadcast.emit('room created', newRoom.id);
   });
 
-  socket.on('join room', () => { // create the second room
-    if (!roomIsFull(theRoom)) {
-      socket.join(theRoom.id);
-      theRoom.playerTwo.name = assignName(currentUser);
+  socket.on('join room', (roomName) => {
+    const room = findRoom(roomName);
 
-      socket.broadcast.to(theRoom.id).emit('start game', matrix);
+    if (roomIsFull(room)) {
+      socket.emit('the room is full');
+    } else {
+      socket.join(room.id);
+      room.playerTwo.name = assignName(currentUser);
+      socket.broadcast.to(room.id).emit('start game', matrix);
       socket.emit('start game', matrix);
 
-      socket.broadcast.to(theRoom.id).emit('message', 'your first move');
+      socket.broadcast.to(room.id).emit('message', 'your first move');
       socket.emit('freeze game', 'wait for player one\'s first move');
-      socket.emit('update user stats', currentUser, theRoom.id);
-    } else {
-      socket.emit('message', 'Invalid name and/or room ID');
+      socket.emit('update user stats', currentUser, room.id);
     }
   });
 
 
-  // verify if the message reveived(obj) has the cellIndex property
-  socket.on('game input', (cellIndex) => { // change roomIdHash with some hash
+  socket.on('game input', (cellIndex, roomName) => {
     movesCount += 1;
     // determine what the current cellValue is and update the matrix with it
     const cellValue = currentMoveIsX ? 'X' : '0';
     updateMatrix(cellIndex, cellValue);
     currentMoveIsX = !currentMoveIsX;
 
+    const room = findRoom(roomName);
+
     socket.emit('update game', cellIndex, cellValue); // broadcast message back to sender
     socket.emit('freeze game', 'wait a second...');
-    socket.broadcast.to(theRoom.id).emit('update game', cellIndex, cellValue); // broadcast message to everyone except the sender
-    socket.broadcast.to(theRoom.id).emit('unfreeze game', 'It\'s your turn!');
+    socket.broadcast.to(room.id).emit('update game', cellIndex, cellValue); // broadcast message to everyone except the sender
+    socket.broadcast.to(room.id).emit('unfreeze game', 'It\'s your turn!');
 
     if (game.checkWinner(matrix, cellIndex, cellValue)) {
-      socket.broadcast.to(theRoom.id).emit('game over', 'You lost!');
+      socket.broadcast.to(room.id).emit('game over', 'You lost!');
       socket.emit('game over', 'Congratulations! You won.');
 
       const currentScore = currentUser.score + 1;
@@ -194,18 +214,9 @@ server.on('connection', (socket) => {
         }));
       });
     } else if (movesCount === 9) {
-      socket.broadcast.to(theRoom.id).emit('game over', 'It\'s a tie. Nobody won!');
+      socket.broadcast.to(room.id).emit('game over', 'It\'s a tie. Nobody won!');
       socket.emit('game over', 'It\'s a tie. Nobody won!');
     }
-  });
-
-  socket.on('play again', () => {
-    socket.broadcast.to(theRoom.id).emit('message', '');
-
-    movesCount = 0;
-    matrix = game.generateMatrix(3, 3);
-    socket.emit('start game', matrix);
-    socket.broadcast.to(theRoom.id).emit('start game', matrix);
   });
 
   socket.on('disconnect', () => {

@@ -50,9 +50,9 @@ const handleGameClick = (e) => {
 
   if (!classes.contains('selected')) {
     $cell.classList.add('selected');
-    const roomIdHash = document.getElementById('room-id-hash').innerText;
+    const roomName = document.getElementById('room-name').innerText;
 
-    ioClient.emit('game input', cellIndex, roomIdHash); // change roomId with some hash
+    ioClient.emit('game input', cellIndex, roomName);
   }
 };
 
@@ -79,10 +79,10 @@ const addGameInputListener = () => {
   $boardGame.addEventListener('click', handleGameClick);
 };
 
-const addNewRoom = (roomId) => {
+const addNewRoom = (roomName) => {
   const $roomsList = document.getElementById('rooms');
   const $room = document.createElement('li');
-  $room.appendChild(document.createTextNode(roomId));
+  $room.appendChild(document.createTextNode(roomName));
   $roomsList.appendChild($room);
 
   $room.addEventListener('click', () => {
@@ -90,15 +90,15 @@ const addNewRoom = (roomId) => {
     document.getElementById('messageBox').classList.remove('hidden');
     document.getElementById('container').innerHTML = '';
 
-    ioClient.emit('join room');
+    ioClient.emit('join room', roomName);
   });
 };
 
 const displayUserStats = (user, room = '') => {
-  document.getElementById('room-id-hash').innerText = `Room: ${room}`;
+  document.getElementById('room-name').innerText = room;
   document.getElementById('player-name').innerText = `Hello, ${user.username}`;
-  document.getElementById('player-score').innerText = `Score: ${user.score}`;
-  document.getElementById('player-rank').innerText = `Rank: ${user.rank}`;
+  document.getElementById('player-score').innerText = user.score;
+  document.getElementById('player-rank').innerText = user.rank;
 };
 
 
@@ -120,6 +120,10 @@ ioClient.on('wait player 2', (message) => {
   // clear page and display the waiting message
   document.getElementById('container').innerHTML = '';
   updateMessageField(message);
+});
+
+ioClient.on('the room is full', () => {
+  console.log('The room is full!');
 });
 
 ioClient.on('user stats on connection', (user) => {
