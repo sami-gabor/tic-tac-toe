@@ -15,12 +15,11 @@ function ensureAuthMiddleware(req, res, next) {
     if (err) {
       return res.redirect('/failed');
     }
-    // TODO: handle result for both: local and GitHub strategies
-    // if (result[0] && token === result[0].token) {
-    //   // if found, query for user and store on req.user and call next() --> stored by passport-local
-    //   next();
-    // }
-    next();
+
+    if (token === result[0].token) {
+      // if found, query for user and store on req.user and call next() --> stored by passport-local
+      next();
+    }
   });
 }
 
