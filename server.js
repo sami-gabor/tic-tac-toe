@@ -187,32 +187,25 @@ server.on('connection', (socket) => {
 
   socket.on('game input', (cellIndex, roomName) => {
     movesCount += 1;
-    // determine what the current cellValue is and update the matrix with it
-    const cellValue = currentMoveIsX ? 'X' : '0';
+    const cellValue = currentMoveIsX ? 'X' : '0'; // determine what the current cellValue is
     updateMatrix(cellIndex, cellValue);
     currentMoveIsX = !currentMoveIsX;
 
     const room = findRoom(roomName);
 
-    socket.emit('update game', cellIndex, cellValue); // broadcast message back to sender
+    socket.emit('update game', cellIndex, cellValue);
     socket.emit('freeze game', 'wait a second...');
-    socket.broadcast.to(room.id).emit('update game', cellIndex, cellValue); // broadcast message to everyone except the sender
+    socket.broadcast.to(room.id).emit('update game', cellIndex, cellValue);
     socket.broadcast.to(room.id).emit('unfreeze game', 'It\'s your turn!');
 
     if (game.checkWinner(matrix, cellIndex, cellValue)) {
-      resetGame();
-
       socket.broadcast.to(room.id).emit('game over', 'You lost!');
       socket.emit('game over', 'Congratulations! You won.');
 
-      const currentScore = currentUser.score + 1;
+      currentUser.score += 1;
 
-      if (currentScore && currentUser.user_id) {
-        db.updateScore(currentScore, currentUser.user_id);
-        socket.emit('update score', currentScore);
-      } else {
-        console.log('Couldn\'t update score: ', currentScore, currentUser.user_id);
-      }
+      db.updateScore(currentUser.score, currentUser.user_id);
+      socket.emit('update score', currentUser.score);
 
       db.getUsernamesAndScores((error, result) => {
         const users = [];
@@ -220,6 +213,8 @@ server.on('connection', (socket) => {
           users.push({ name: user.username, score: user.score });
         }));
       });
+
+      resetGame();
     } else if (movesCount === 9) {
       resetGame();
 
@@ -239,7 +234,6 @@ server.on('connection', (socket) => {
     socket.emit('start game', matrix);
     socket.emit('freeze game', 'Rematch ininitiaded. Wait for the opponent to accept.');
     socket.broadcast.emit('message', `${playerName} initiated a rematch. Do you accept?`);
-    // socket.broadcast.emit('message', 'Your opponent wants a rematch! Do you accept?');
     socket.broadcast.emit('rematch was initiated');
   });
 
