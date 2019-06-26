@@ -13,7 +13,7 @@ function ensureAuthMiddleware(req, res, next) {
 
   db.searchToken(token, (err, result) => { // result will have data from both tables(users & tokens)
     if (err) {
-      return res.redirect('/failed');
+      return res.redirect('/db-error');
     }
 
     if (token === result[0].token) {
@@ -34,6 +34,10 @@ module.exports = (app) => {
 
   app.get('/failed', (req, res) => {
     res.send('<h2>Username and/or password are incorrect</h2>');
+  });
+
+  app.get('/db-error', (req, res) => {
+    res.send('<h2>There was an error while trying to connect to the database</h2>');
   });
 
 
@@ -72,8 +76,9 @@ module.exports = (app) => {
 
       db.getUserByEmail(email, (error, result) => {
         const token = crypto.randomBytes(128).toString('hex');
-
-        if (result[0].username === req.user.username) {
+        if (error) {
+          console.log('Error database connection: ', error);
+        } else if (result[0].username === req.user.username) {
           db.storeToken(token, result[0].id);
         } else {
           db.storeUserData(username, password, email);

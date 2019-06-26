@@ -121,6 +121,11 @@ const findRoom = (roomName) => {
   return result;
 };
 
+const resetGame = () => {
+  matrix = game.generateMatrix(3, 3);
+  movesCount = 0;
+};
+
 
 server.on('connection', (socket) => {
   const { token } = cookie.parse(socket.handshake.headers.cookie);
@@ -195,6 +200,8 @@ server.on('connection', (socket) => {
     socket.broadcast.to(room.id).emit('unfreeze game', 'It\'s your turn!');
 
     if (game.checkWinner(matrix, cellIndex, cellValue)) {
+      resetGame();
+
       socket.broadcast.to(room.id).emit('game over', 'You lost!');
       socket.emit('game over', 'Congratulations! You won.');
 
@@ -214,6 +221,8 @@ server.on('connection', (socket) => {
         }));
       });
     } else if (movesCount === 9) {
+      resetGame();
+
       socket.broadcast.to(room.id).emit('game over', 'It\'s a tie. Nobody won!');
       socket.emit('game over', 'It\'s a tie. Nobody won!');
     }
@@ -222,6 +231,22 @@ server.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log(`disconnected from: ${playerId}`);
     socket.broadcast.emit('message', `${playerId} was disconnected.`);
+    socket.broadcast.emit('display back to rooms button');
+  });
+
+  socket.on('initiate rematch', (playerName) => {
+    resetGame();
+    socket.emit('start game', matrix);
+    socket.emit('freeze game', 'Rematch ininitiaded. Wait for the opponent to accept.');
+    socket.broadcast.emit('message', `${playerName} initiated a rematch. Do you accept?`);
+    // socket.broadcast.emit('message', 'Your opponent wants a rematch! Do you accept?');
+    socket.broadcast.emit('rematch was initiated');
+  });
+
+  socket.on('accept rematch', () => {
+    socket.emit('start game', matrix);
+    socket.emit('freeze game', 'wait for the other player\'s first move');
+    socket.broadcast.emit('unfreeze game', 'Rematch accepted. Have your first move!');
   });
 
   const standardInput = process.stdin;

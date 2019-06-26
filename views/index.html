@@ -65,9 +65,9 @@
                         username
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Room:<span id="room-name"></span></a>
-                        <a class="dropdown-item" href="#">Score:<span id="player-score"></span></a>
-                        <a class="dropdown-item" href="#">Rank:<span id="player-rank"></span></a>
+                        <a class="dropdown-item" href="#">Room: <span id="room-name"></span></a>
+                        <a class="dropdown-item" href="#">Score: <span id="player-score"></span></a>
+                        <a class="dropdown-item" href="#">Rank: <span id="player-rank"></span></a>
                         <a class="dropdown-item" href="#" id="navbarDropdown" role="button" data-toggle="modal" data-target="#howToPlayModal" aria-haspopup="true" aria-expanded="false">
                             How to play
                         </a>
@@ -114,9 +114,10 @@
         </div>
     </div>
 
-    <div id="gameOver">
-        <div id="rankingList"></div>
-    </div>
+    <div id="gameOverButtons" class="d-flex justify-content-center">
+        <button id="rematch" type="button" class="hidden btn btn-info m-1">Rematch</button>
+        <button id="backToRooms" type="button" class="hidden btn btn-info m-1">Back to rooms</button>
+    </bu>
 
     <!-- Small modal: How To Play-->
     <div class="modal" id="howToPlayModal" tabindex="-1" role="dialog" aria-hidden="true">

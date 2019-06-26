@@ -101,6 +101,42 @@ const displayUserStats = (user, room = '') => {
   document.getElementById('player-rank').innerText = user.rank;
 };
 
+const handleRematchButton = () => {
+  const $rematchButton = document.getElementById('rematch');
+  $rematchButton.removeEventListener('click', handleRematchButton);
+  $rematchButton.classList.add('hidden');
+  const playerName = document.getElementById('player-name').innerText;
+  ioClient.emit('initiate rematch', playerName);
+};
+
+const displayRematchButton = () => {
+  const $rematchButton = document.getElementById('rematch');
+  $rematchButton.classList.remove('hidden');
+  $rematchButton.addEventListener('click', handleRematchButton);
+};
+
+const handleRoomsButton = () => {
+  const $roomsButton = document.getElementById('backToRooms');
+  $roomsButton.classList.add('hidden');
+};
+
+const displayBackToRoomsButton = () => {
+  const $backToRoomsButton = document.getElementById('backToRooms');
+  $backToRoomsButton.classList.remove('hidden');
+  $backToRoomsButton.addEventListener('click', handleRoomsButton);
+};
+
+const acceptRematch = () => {
+  const $rematchButton = document.getElementById('rematch');
+  $rematchButton.removeEventListener('click', handleRematchButton);
+  $rematchButton.innerHTML = 'Accept Rematch?';
+
+  $rematchButton.addEventListener('click', () => {
+    ioClient.emit('accept rematch');
+    $rematchButton.innerHTML = 'Rematch';
+    $rematchButton.classList.add('hidden');
+  });
+};
 
 // set up incomming communication channels
 ioClient.on('connect', () => {
@@ -135,7 +171,7 @@ ioClient.on('update user stats', (user, room) => {
 });
 
 ioClient.on('update score', (playerScore) => {
-  document.getElementById('player-score').innerText = `Score: ${playerScore}`;
+  document.getElementById('player-score').innerText = playerScore;
 });
 
 ioClient.on('update game', (cellIndex, cellValue) => {
@@ -145,6 +181,8 @@ ioClient.on('update game', (cellIndex, cellValue) => {
 ioClient.on('game over', (message) => {
   updateMessageField(message);
   freezeBoardGame();
+  displayRematchButton();
+  displayBackToRoomsButton();
 });
 
 ioClient.on('freeze game', (message) => {
@@ -162,4 +200,14 @@ ioClient.on('message', (message) => {
   updateMessageField(message);
 });
 
-ioClient.on('disconnect', () => console.log('The server has disconnected!'));
+ioClient.on('disconnect', () => {
+  console.log('The server has disconnected!');
+});
+
+ioClient.on('rematch was initiated', () => {
+  acceptRematch();
+});
+
+ioClient.on('display back to rooms button', () => {
+  displayBackToRoomsButton();
+});
