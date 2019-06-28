@@ -116,13 +116,13 @@ const displayRematchButton = () => {
 };
 
 const handleRoomsButton = () => {
-  const $roomsButton = document.getElementById('backToRooms');
+  const $roomsButton = document.getElementById('leaveRoom');
   $roomsButton.classList.add('hidden');
   // redirectToHomePage();
 };
 
-const displayBackToRoomsButton = () => {
-  const $backToRoomsButton = document.getElementById('backToRooms');
+const displayLeaveRoomButton = () => {
+  const $backToRoomsButton = document.getElementById('leaveRoom');
   $backToRoomsButton.classList.remove('hidden');
   $backToRoomsButton.addEventListener('click', handleRoomsButton);
 };
@@ -194,7 +194,7 @@ ioClient.on('game over', (message) => {
   updateMessageField(message);
   freezeBoardGame();
   displayRematchButton();
-  displayBackToRoomsButton();
+  displayLeaveRoomButton();
 });
 
 ioClient.on('freeze game', (message) => {
@@ -220,6 +220,6 @@ ioClient.on('rematch was initiated', () => {
   acceptRematch();
 });
 
-ioClient.on('display back to rooms button', () => {
-  displayBackToRoomsButton();
+ioClient.on('display leave room button', () => {
+  displayLeaveRoomButton();
 });

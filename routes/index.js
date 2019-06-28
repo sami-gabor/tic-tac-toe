@@ -11,26 +11,20 @@ function ensureAuthMiddleware(req, res, next) {
     return res.redirect('/login');
   }
 
-  console.log('in ensureAuthMiddleware: ', token)
   db.searchToken(token, (err, result) => { // result will have data from both tables(users & tokens)
     if (err) {
       return res.redirect('/db-error');
     }
 
-    console.log(1, token, result)
     if (token === result[0].token) {
       // if found, query for user and store on req.user and call next() --> stored by passport-local
-      console.log('token in the same');
       next();
     }
-    console.log('token in NOT the same');
-    // next();
   });
 }
 
 module.exports = (app) => {
   app.get('/', ensureAuthMiddleware, (req, res) => {
-    console.log('/ gsdfgsdfgsdfg sdfgsd fg sdfg')
     res.sendFile(path.join(__dirname, '../views/index.html')); // [, dataforview]
   });
 

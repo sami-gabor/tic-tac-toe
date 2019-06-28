@@ -92,20 +92,19 @@ const assignName = (user) => {
   return user.username || user.github_username || generateName();
 };
 
-const rooms = [];
+let rooms = [];
 
-const createNewRoom = (roomName, playerName, playerId) => {
+const createNewRoom = (roomName, roomId, playerName) => {
   const room = {
-    id: roomName,
+    name: roomName,
+    id: roomId,
     playerOne: {
       name: playerName,
       score: 0,
-      Id: playerId,
     },
     playerTwo: {
       name: '',
       score: 0,
-      Id: '',
     },
   };
 
@@ -113,14 +112,7 @@ const createNewRoom = (roomName, playerName, playerId) => {
 };
 
 const findRoom = (roomName) => {
-  let result;
-  rooms.forEach((room) => {
-    if (room.id === roomName) {
-      result = room;
-    }
-  });
-
-  return result;
+  return rooms.filter(room => room.id === roomName)[0];
 };
 
 const resetGame = () => {
@@ -128,12 +120,18 @@ const resetGame = () => {
   movesCount = 0;
 };
 
+const getRoomById = (roomId) => {
+  return rooms.filter(room => room.id === roomId)[0];
+};
+
+const filterRooms = (roomId) => {
+  return rooms.filter(room => room.id !== roomId);
+};
 
 server.on('connection', (socket) => {
   socket.emit('display existing rooms', rooms);
   socket.broadcast.emit('display existing rooms', rooms);
 
-  // console.log(rooms);
   const { token } = cookie.parse(socket.handshake.headers.cookie);
 
   // validate if token is valid
@@ -163,15 +161,14 @@ server.on('connection', (socket) => {
     const randomRoomName = crypto.randomBytes(8).toString('hex');
     const roomName = roomNameOptionalInput || randomRoomName;
     const playerName = assignName(currentUser);
-    const playerId = socket.id;
-    // const playerId = socket.id;
-    const newRoom = createNewRoom(roomName, playerName, playerId);
+    const roomId = socket.id;
+    const newRoom = createNewRoom(roomName, roomId, playerName);
+
     rooms.push(newRoom);
 
     socket.join(newRoom.id);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
     socket.emit('update user stats', currentUser, newRoom.id);
-    // socket.broadcast.emit('room created', newRoom.id);
     socket.broadcast.emit('display existing rooms', rooms);
   });
 
@@ -183,8 +180,6 @@ server.on('connection', (socket) => {
     } else {
       socket.join(room.id);
       room.playerTwo.name = assignName(currentUser);
-      const playerId = socket.id;
-      room.playerTwo.Id = playerId;
       socket.broadcast.to(room.id).emit('start game', matrix);
       socket.emit('start game', matrix);
 
@@ -234,9 +229,15 @@ server.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    const room = getRoomById(socket.id);
+
+    if (room) {
+      rooms = filterRooms(room.id);
+    }
+
+    socket.broadcast.emit('display leave room button');
+    socket.broadcast.emit('display existing rooms', rooms);
     console.log(`disconnected from: ${socket.id}`);
-    // socket.broadcast.emit('message', `${playerId} was disconnected.`);
-    socket.broadcast.emit('display back to rooms button');
   });
 
   socket.on('initiate rematch', (playerName) => {
