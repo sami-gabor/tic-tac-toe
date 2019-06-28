@@ -118,6 +118,7 @@ const displayRematchButton = () => {
 const handleRoomsButton = () => {
   const $roomsButton = document.getElementById('backToRooms');
   $roomsButton.classList.add('hidden');
+  // redirectToHomePage();
 };
 
 const displayBackToRoomsButton = () => {
@@ -138,9 +139,20 @@ const acceptRematch = () => {
   });
 };
 
+const displayExistingRooms = (rooms) => {
+  document.getElementById('rooms').innerHTML = '';
+  rooms.forEach((room) => {
+    addNewRoom(room.id);
+  });
+};
+
 // set up incomming communication channels
 ioClient.on('connect', () => {
   console.log('Client has connected to the server!');
+});
+
+ioClient.on('display existing rooms', (rooms) => {
+  displayExistingRooms(rooms);
 });
 
 ioClient.on('room created', (roomId) => {
