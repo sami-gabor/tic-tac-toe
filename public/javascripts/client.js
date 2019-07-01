@@ -6,6 +6,11 @@ const hideElement = (elementId) => {
   $element.classList.add('hidden');
 };
 
+const showElement = (elementId) => {
+  const $element = document.getElementById(elementId);
+  $element.classList.remove('hidden');
+};
+
 function createTable(arr) {
   hideElement('container-create-new-game');
 
@@ -111,22 +116,24 @@ const displayUserStats = (user, room = '') => {
 };
 
 const handleRematchButton = () => {
-  const $rematchButton = document.getElementById('rematch');
-  $rematchButton.removeEventListener('click', handleRematchButton);
-  $rematchButton.classList.add('hidden');
+  document.getElementById('rematch').removeEventListener('click', handleRematchButton);
+  hideElement('rematch');
+
   const playerName = document.getElementById('player-name').innerText;
   ioClient.emit('initiate rematch', playerName);
 };
 
 const displayRematchButton = () => {
-  const $rematchButton = document.getElementById('rematch');
-  $rematchButton.classList.remove('hidden');
-  $rematchButton.addEventListener('click', handleRematchButton);
+  showElement('rematch');
+  document.getElementById('rematch').addEventListener('click', handleRematchButton);
 };
 
 const leaveRoom = () => {
-  const $roomName = document.getElementById('room-name').innerText;
-  ioClient.emit('leave room', $roomName);
+  showElement('container-create-new-game');
+  hideElement('container-game-board');
+
+  const roomName = document.getElementById('room-name').innerText;
+  ioClient.emit('leave room', roomName);
 };
 
 const handleLeaveRoomButton = () => {
@@ -135,9 +142,8 @@ const handleLeaveRoomButton = () => {
 };
 
 const displayLeaveRoomButton = () => {
-  const $backToRoomsButton = document.getElementById('leaveRoomButton');
-  $backToRoomsButton.classList.remove('hidden');
-  $backToRoomsButton.addEventListener('click', handleLeaveRoomButton);
+  showElement('leaveRoomButton');
+  document.getElementById('leaveRoomButton').addEventListener('click', handleLeaveRoomButton);
 };
 
 const acceptRematch = () => {

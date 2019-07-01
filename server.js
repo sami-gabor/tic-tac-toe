@@ -260,12 +260,9 @@ server.on('connection', (socket) => {
   });
 
   socket.on('leave room', (roomName) => {
-    console.log(1, rooms);
     deleteRoom(roomName);
-    console.log(2, rooms);
     resetGame();
     socket.emit('display existing rooms', rooms);
-    socket.broadcast.emit('display existing rooms', rooms);
   });
 
   const standardInput = process.stdin;
