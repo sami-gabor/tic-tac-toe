@@ -1,8 +1,15 @@
 const ioClient = io.connect('http://localhost:8000');
 
 
+const hideElement = (elementId) => {
+  const $element = document.getElementById(elementId);
+  $element.classList.add('hidden');
+};
+
 function createTable(arr) {
-  const $container = document.getElementById('container');
+  hideElement('container-create-new-game');
+
+  const $container = document.getElementById('container-game-board');
   $container.innerHTML = '';
   const $table = document.createElement('table');
   const $tableBody = document.createElement('tbody');
@@ -85,10 +92,12 @@ const addNewRoom = (roomName) => {
   $room.appendChild(document.createTextNode(roomName));
   $roomsList.appendChild($room);
 
+  console.log('addNewRoom: ', roomName);
+
   $room.addEventListener('click', () => {
     document.getElementById('activeRooms').classList.add('hidden');
     document.getElementById('messageBox').classList.remove('hidden');
-    document.getElementById('container').innerHTML = '';
+    document.getElementById('container-create-new-game').innerHTML = '';
 
     ioClient.emit('join room', roomName);
   });
@@ -115,16 +124,20 @@ const displayRematchButton = () => {
   $rematchButton.addEventListener('click', handleRematchButton);
 };
 
-const handleRoomsButton = () => {
-  const $roomsButton = document.getElementById('leaveRoom');
-  $roomsButton.classList.add('hidden');
-  // redirectToHomePage();
+const leaveRoom = () => {
+  const $roomName = document.getElementById('room-name').innerText;
+  ioClient.emit('leave room', $roomName);
+};
+
+const handleLeaveRoomButton = () => {
+  hideElement('leaveRoomButton');
+  leaveRoom();
 };
 
 const displayLeaveRoomButton = () => {
-  const $backToRoomsButton = document.getElementById('leaveRoom');
+  const $backToRoomsButton = document.getElementById('leaveRoomButton');
   $backToRoomsButton.classList.remove('hidden');
-  $backToRoomsButton.addEventListener('click', handleRoomsButton);
+  $backToRoomsButton.addEventListener('click', handleLeaveRoomButton);
 };
 
 const acceptRematch = () => {
@@ -153,6 +166,7 @@ ioClient.on('connect', () => {
 
 ioClient.on('display existing rooms', (rooms) => {
   displayExistingRooms(rooms);
+  console.log('display rooms now!', rooms)
 });
 
 ioClient.on('room created', (roomId) => {
@@ -166,7 +180,7 @@ ioClient.on('start game', (emptyMatrix) => {
 
 ioClient.on('wait player 2', (message) => {
   // clear page and display the waiting message
-  document.getElementById('container').innerHTML = '';
+  document.getElementById('container-create-new-game').innerHTML = '';
   updateMessageField(message);
 });
 

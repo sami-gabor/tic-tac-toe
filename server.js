@@ -115,6 +115,10 @@ const findRoom = (roomName) => {
   return rooms.filter(room => room.id === roomName)[0];
 };
 
+const deleteRoom = (roomName) => {
+  rooms = rooms.filter(room => room.id !== roomName);
+};
+
 const resetGame = () => {
   matrix = game.generateMatrix(3, 3);
   movesCount = 0;
@@ -169,6 +173,7 @@ server.on('connection', (socket) => {
     socket.join(newRoom.id);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
     socket.emit('update user stats', currentUser, newRoom.id);
+    socket.emit('display leave room button');
     socket.broadcast.emit('display existing rooms', rooms);
   });
 
@@ -186,6 +191,7 @@ server.on('connection', (socket) => {
       socket.broadcast.to(room.id).emit('message', 'your first move');
       socket.emit('freeze game', 'wait for player one\'s first move');
       socket.emit('update user stats', currentUser, room.id);
+      socket.emit('display leave room button');
     }
   });
 
@@ -235,7 +241,6 @@ server.on('connection', (socket) => {
       rooms = filterRooms(room.id);
     }
 
-    socket.broadcast.emit('display leave room button');
     socket.broadcast.emit('display existing rooms', rooms);
     console.log(`disconnected from: ${socket.id}`);
   });
@@ -252,6 +257,15 @@ server.on('connection', (socket) => {
     socket.emit('start game', matrix);
     socket.emit('freeze game', 'wait for the other player\'s first move');
     socket.broadcast.emit('unfreeze game', 'Rematch accepted. Have your first move!');
+  });
+
+  socket.on('leave room', (roomName) => {
+    console.log(1, rooms);
+    deleteRoom(roomName);
+    console.log(2, rooms);
+    resetGame();
+    socket.emit('display existing rooms', rooms);
+    socket.broadcast.emit('display existing rooms', rooms);
   });
 
   const standardInput = process.stdin;
