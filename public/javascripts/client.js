@@ -79,8 +79,10 @@ const freezeBoardGame = () => {
 const $newGameButton = document.getElementById('new');
 $newGameButton.addEventListener('click', () => {
   const roomId = document.getElementById('roomNew').value;
-  document.getElementById('activeRooms').classList.add('hidden');
-  document.getElementById('messageBox').classList.remove('hidden');
+  hideElement('activeRooms');
+  hideElement('container-create-new-game');
+  // document.getElementById('container-create-new-game').innerHTML = '';
+  showElement('messageBox');
 
   ioClient.emit('new room', roomId);
 });
@@ -100,9 +102,10 @@ const addNewRoom = (roomName) => {
   console.log('addNewRoom: ', roomName);
 
   $room.addEventListener('click', () => {
-    document.getElementById('activeRooms').classList.add('hidden');
-    document.getElementById('messageBox').classList.remove('hidden');
-    document.getElementById('container-create-new-game').innerHTML = '';
+    hideElement('activeRooms');
+    showElement('messageBox');
+    // document.getElementById('container-create-new-game').innerHTML = '';
+    hideElement('container-create-new-game');
 
     ioClient.emit('join room', roomName);
   });
@@ -130,14 +133,17 @@ const displayRematchButton = () => {
 
 const leaveRoom = () => {
   showElement('container-create-new-game');
-  hideElement('container-game-board');
+  // hideElement('container-game-board');
+  hideElement('messageBox');
 
   const roomName = document.getElementById('room-name').innerText;
+  console.log(roomName, document.getElementById('container-create-new-game'));
   ioClient.emit('leave room', roomName);
 };
 
 const handleLeaveRoomButton = () => {
   hideElement('leaveRoomButton');
+  showElement('container-user-input');
   leaveRoom();
 };
 
@@ -186,7 +192,8 @@ ioClient.on('start game', (emptyMatrix) => {
 
 ioClient.on('wait player 2', (message) => {
   // clear page and display the waiting message
-  document.getElementById('container-create-new-game').innerHTML = '';
+  // document.getElementById('container-create-new-game').innerHTML = '';
+  hideElement('container-create-new-game');
   updateMessageField(message);
 });
 

@@ -260,7 +260,9 @@ server.on('connection', (socket) => {
   });
 
   socket.on('leave room', (roomName) => {
+    console.log(roomName, rooms);
     deleteRoom(roomName);
+    console.log(roomName, rooms);
     resetGame();
     socket.emit('display existing rooms', rooms);
   });
