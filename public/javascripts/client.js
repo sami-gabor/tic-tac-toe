@@ -81,7 +81,6 @@ const freezeBoardGame = () => {
 const $newGameButton = document.getElementById('new');
 $newGameButton.addEventListener('click', () => {
   const roomId = document.getElementById('roomNew').value;
-  console.log(12, roomId)
   hideElement('activeRooms');
   document.getElementById('container-create-new-game').innerHTML = '';
   showElement('messageBox');
@@ -157,7 +156,7 @@ const acceptRematch = () => {
 const displayExistingRooms = (rooms) => {
   document.getElementById('rooms').innerHTML = '';
   rooms.forEach((room) => {
-    addNewRoom(room.id);
+    addNewRoom(room.name);
   });
 };
 

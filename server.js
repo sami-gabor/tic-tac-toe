@@ -112,7 +112,7 @@ const createNewRoom = (roomName, roomId, playerName) => {
 };
 
 const findRoom = (roomName) => {
-  return rooms.filter(room => room.id === roomName)[0];
+  return rooms.filter(room => room.name === roomName)[0];
 };
 
 const deleteRoom = (roomName) => {
@@ -161,22 +161,23 @@ server.on('connection', (socket) => {
     });
   });
 
+
   socket.on('new room', (roomNameOptionalInput) => {
-    const randomRoomName = crypto.randomBytes(8).toString('hex');
+    const randomRoomName = crypto.randomBytes(4).toString('hex');
     const roomName = roomNameOptionalInput || randomRoomName;
-    console.log('print me: ', roomName, randomRoomName)
     const playerName = assignName(currentUser);
     const roomId = socket.id;
     const newRoom = createNewRoom(roomName, roomId, playerName);
 
     rooms.push(newRoom);
 
-    socket.join(newRoom.id);
+    socket.join(newRoom.name);
     socket.emit('wait player 2', 'Waiting for the second player to join.');
-    socket.emit('update user stats', currentUser, newRoom.id);
+    socket.emit('update user stats', currentUser, newRoom.name);
     socket.emit('display leave room button');
     socket.broadcast.emit('display existing rooms', rooms);
   });
+
 
   socket.on('join room', (roomName) => {
     const room = findRoom(roomName);
@@ -186,7 +187,7 @@ server.on('connection', (socket) => {
     if (roomIsFull(room)) {
       socket.emit('message', 'The room is full!');
     } else {
-      socket.join(room.id);
+      socket.join(room.name);
       room.playerTwo.name = assignName(currentUser);
       socket.broadcast.to(room.id).emit('start game', matrix);
       socket.emit('start game', matrix);
@@ -235,6 +236,7 @@ server.on('connection', (socket) => {
     }
   });
 
+
   socket.on('disconnect', () => {
     const room = getRoomById(socket.id);
 
@@ -246,6 +248,7 @@ server.on('connection', (socket) => {
     console.log(`disconnected from: ${socket.id}`);
   });
 
+
   socket.on('initiate rematch', (playerName, roomName) => {
     socket.emit('start game', matrix);
     socket.emit('freeze game', 'Rematch ininitiaded. Wait for the opponent to accept.');
@@ -256,12 +259,14 @@ server.on('connection', (socket) => {
     resetGame();
   });
 
+
   socket.on('accept rematch', (roomName) => {
     socket.emit('start game', matrix);
     socket.emit('freeze game', 'wait for the other player\'s first move');
 
     socket.broadcast.to(roomName).emit('unfreeze game', 'Rematch accepted. Have your first move!');
   });
+
 
   socket.on('leave room', (roomName) => {
     socket.emit('display existing rooms', rooms);
@@ -276,6 +281,7 @@ server.on('connection', (socket) => {
     resetGame();
   });
 
+  
   const standardInput = process.stdin;
   standardInput.setEncoding('utf-8');
   standardInput.on('data', (data) => {
