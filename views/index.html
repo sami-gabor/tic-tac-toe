@@ -79,17 +79,20 @@
         </div>
     </nav>
 
-    <div id="container-create-new-game" class="row d-flex justify-content-center">container-create-new-game
-        <div class="container-user-input card text-center m-5 shadow-sm mb-5 bg-white rounded">
-            <div class="card-header">
-                Create a new Game
-            </div>
-            <div class="card-body">
-                <input type="text" aria-label="room" class="form-control m-1" name="roomNew" id="roomNew" placeholder="Room Name">
-                <button id="new" type="button" class="btn btn-primary m-1">New Game</button>
+    <div id="container-create-new-game" class="">
+        <div id="container-create-new-game" class="row d-flex justify-content-center">
+            <div class="container-user-input card text-center m-5 shadow-sm mb-5 bg-white rounded">
+                <div class="card-header">
+                    Create a new Game
+                </div>
+                <div class="card-body">
+                    <input type="text" aria-label="room" class="form-control m-1" name="roomNew" id="roomNew" placeholder="Room Name">
+                    <button id="new" type="button" class="btn btn-primary m-1">New Game</button>
+                </div>
             </div>
         </div>
     </div>
+
 
     <div id="container-game-board" class="row d-flex justify-content-center">
          <!-- GAME BOARD -->
@@ -109,7 +112,7 @@
     </div>
           
     <div id="messageBox" class="hidden">
-        <div class="d-flex justify-content-center">
+        <div class=" d-flex justify-content-center">
             <div class="container-active-rooms card text-center m-5 shadow-sm mb-5 bg-white rounded">
                 <div id="messageText" class="card-header">
                     
@@ -119,8 +122,9 @@
     </div>
 
     <div id="gameOverButtons" class="d-flex justify-content-center">
-        <button id="rematch" type="button" class="hidden btn btn-info m-1">Rematch</button>
-        <button id="leaveRoomButton" type="button" class="hidden btn btn-info m-1">Leave Room</button>
+        <button id="initiate-rematch" type="button" class="hidden btn btn-info m-1">Initiate Rematch</button>
+        <button id="accept-rematch" type="button" class="hidden btn btn-info m-1">Accept Rematch</button>
+        <a id="leaveRoomButton" href="http://localhost:3000" class="hidden btn btn-info m-1">Leave Room</a>
     </div>
 
     <!-- Small modal: How To Play-->

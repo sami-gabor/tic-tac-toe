@@ -31,7 +31,7 @@ app.use(express.static('public'));
 app.use(cookieParser(secret));
 
 
-require('./routes/index.js')(app);
+require('./routes/routes.js')(app);
 
 
 passport.use(new GitHubStrategy(passportConfig, (accessToken, refreshToken, profile, cb) => {
@@ -140,7 +140,7 @@ server.on('connection', (socket) => {
 
   // validate if token is valid
   if (!token) {
-    // disconnect
+    console.log('TOKEN NOT FOUND!');
   }
 
   let currentUser;
@@ -164,6 +164,7 @@ server.on('connection', (socket) => {
   socket.on('new room', (roomNameOptionalInput) => {
     const randomRoomName = crypto.randomBytes(8).toString('hex');
     const roomName = roomNameOptionalInput || randomRoomName;
+    console.log('print me: ', roomName, randomRoomName)
     const playerName = assignName(currentUser);
     const roomId = socket.id;
     const newRoom = createNewRoom(roomName, roomId, playerName);
@@ -179,9 +180,11 @@ server.on('connection', (socket) => {
 
   socket.on('join room', (roomName) => {
     const room = findRoom(roomName);
+    deleteRoom(roomName);
+    socket.broadcast.emit('display existing rooms', rooms);
 
     if (roomIsFull(room)) {
-      socket.emit('the room is full');
+      socket.emit('message', 'The room is full!');
     } else {
       socket.join(room.id);
       room.playerTwo.name = assignName(currentUser);
@@ -202,15 +205,13 @@ server.on('connection', (socket) => {
     updateMatrix(cellIndex, cellValue);
     currentMoveIsX = !currentMoveIsX;
 
-    const room = findRoom(roomName);
-
     socket.emit('update game', cellIndex, cellValue);
     socket.emit('freeze game', 'wait a second...');
-    socket.broadcast.to(room.id).emit('update game', cellIndex, cellValue);
-    socket.broadcast.to(room.id).emit('unfreeze game', 'It\'s your turn!');
+    socket.broadcast.to(roomName).emit('update game', cellIndex, cellValue);
+    socket.broadcast.to(roomName).emit('unfreeze game', 'It\'s your turn!');
 
     if (game.checkWinner(matrix, cellIndex, cellValue)) {
-      socket.broadcast.to(room.id).emit('game over', 'You lost!');
+      socket.broadcast.to(roomName).emit('game over', 'You lost!');
       socket.emit('game over', 'Congratulations! You won.');
 
       currentUser.score += 1;
@@ -227,10 +228,10 @@ server.on('connection', (socket) => {
 
       resetGame();
     } else if (movesCount === 9) {
-      resetGame();
-
-      socket.broadcast.to(room.id).emit('game over', 'It\'s a tie. Nobody won!');
+      socket.broadcast.to(roomName).emit('game over', 'It\'s a tie. Nobody won!');
       socket.emit('game over', 'It\'s a tie. Nobody won!');
+
+      resetGame();
     }
   });
 
@@ -245,26 +246,34 @@ server.on('connection', (socket) => {
     console.log(`disconnected from: ${socket.id}`);
   });
 
-  socket.on('initiate rematch', (playerName) => {
-    resetGame();
+  socket.on('initiate rematch', (playerName, roomName) => {
     socket.emit('start game', matrix);
     socket.emit('freeze game', 'Rematch ininitiaded. Wait for the opponent to accept.');
-    socket.broadcast.emit('message', `${playerName} initiated a rematch. Do you accept?`);
-    socket.broadcast.emit('rematch was initiated');
+
+    socket.broadcast.to(roomName).emit('message', `${playerName} initiated a rematch. Do you accept?`);
+    socket.broadcast.to(roomName).emit('rematch was initiated');
+
+    resetGame();
   });
 
-  socket.on('accept rematch', () => {
+  socket.on('accept rematch', (roomName) => {
     socket.emit('start game', matrix);
     socket.emit('freeze game', 'wait for the other player\'s first move');
-    socket.broadcast.emit('unfreeze game', 'Rematch accepted. Have your first move!');
+
+    socket.broadcast.to(roomName).emit('unfreeze game', 'Rematch accepted. Have your first move!');
   });
 
   socket.on('leave room', (roomName) => {
-    console.log(roomName, rooms);
-    deleteRoom(roomName);
-    console.log(roomName, rooms);
-    resetGame();
     socket.emit('display existing rooms', rooms);
+
+    const room = getRoomById(socket.id);
+    if (room) {
+      socket.broadcast.to(room.id).emit('display existing rooms', rooms);
+      socket.broadcast.to(room.id).emit('message', 'Player left the room!');
+    }
+
+    deleteRoom(roomName);
+    resetGame();
   });
 
   const standardInput = process.stdin;

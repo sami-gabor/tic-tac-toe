@@ -8,11 +8,13 @@ const hideElement = (elementId) => {
 
 const showElement = (elementId) => {
   const $element = document.getElementById(elementId);
-  $element.classList.remove('hidden');
+  if ($element) {
+    $element.classList.remove('hidden');
+  }
 };
 
 function createTable(arr) {
-  hideElement('container-create-new-game');
+  document.getElementById('container-create-new-game').innerHTML = '';
 
   const $container = document.getElementById('container-game-board');
   $container.innerHTML = '';
@@ -79,10 +81,11 @@ const freezeBoardGame = () => {
 const $newGameButton = document.getElementById('new');
 $newGameButton.addEventListener('click', () => {
   const roomId = document.getElementById('roomNew').value;
+  console.log(12, roomId)
   hideElement('activeRooms');
-  hideElement('container-create-new-game');
-  // document.getElementById('container-create-new-game').innerHTML = '';
+  document.getElementById('container-create-new-game').innerHTML = '';
   showElement('messageBox');
+  showElement('leaveRoomButton');
 
   ioClient.emit('new room', roomId);
 });
@@ -99,13 +102,11 @@ const addNewRoom = (roomName) => {
   $room.appendChild(document.createTextNode(roomName));
   $roomsList.appendChild($room);
 
-  console.log('addNewRoom: ', roomName);
-
   $room.addEventListener('click', () => {
     hideElement('activeRooms');
     showElement('messageBox');
-    // document.getElementById('container-create-new-game').innerHTML = '';
-    hideElement('container-create-new-game');
+    showElement('leaveRoomButton');
+    document.getElementById('container-create-new-game').innerHTML = '';
 
     ioClient.emit('join room', roomName);
   });
@@ -119,48 +120,37 @@ const displayUserStats = (user, room = '') => {
 };
 
 const handleRematchButton = () => {
-  document.getElementById('rematch').removeEventListener('click', handleRematchButton);
-  hideElement('rematch');
+  document.getElementById('initiate-rematch').removeEventListener('click', handleRematchButton);
 
   const playerName = document.getElementById('player-name').innerText;
-  ioClient.emit('initiate rematch', playerName);
+  const roomName = document.getElementById('room-name').innerText;
+  ioClient.emit('initiate rematch', playerName, roomName);
+  hideElement('initiate-rematch');
 };
 
 const displayRematchButton = () => {
-  showElement('rematch');
-  document.getElementById('rematch').addEventListener('click', handleRematchButton);
+  showElement('initiate-rematch');
+  document.getElementById('initiate-rematch').addEventListener('click', handleRematchButton);
 };
 
 const leaveRoom = () => {
-  showElement('container-create-new-game');
-  // hideElement('container-game-board');
-  hideElement('messageBox');
-
   const roomName = document.getElementById('room-name').innerText;
-  console.log(roomName, document.getElementById('container-create-new-game'));
+  document.getElementById('container-create-new-game').innerHTML = '';
   ioClient.emit('leave room', roomName);
 };
 
-const handleLeaveRoomButton = () => {
-  hideElement('leaveRoomButton');
-  showElement('container-user-input');
-  leaveRoom();
-};
-
 const displayLeaveRoomButton = () => {
-  showElement('leaveRoomButton');
-  document.getElementById('leaveRoomButton').addEventListener('click', handleLeaveRoomButton);
+  document.getElementById('leaveRoomButton').addEventListener('click', leaveRoom);
 };
 
 const acceptRematch = () => {
-  const $rematchButton = document.getElementById('rematch');
-  $rematchButton.removeEventListener('click', handleRematchButton);
-  $rematchButton.innerHTML = 'Accept Rematch?';
+  showElement('accept-rematch');
+  const $rematchButton = document.getElementById('accept-rematch');
 
   $rematchButton.addEventListener('click', () => {
-    ioClient.emit('accept rematch');
-    $rematchButton.innerHTML = 'Rematch';
-    $rematchButton.classList.add('hidden');
+    const roomName = document.getElementById('room-name').innerText;
+    ioClient.emit('accept rematch', roomName);
+    hideElement('accept-rematch');
   });
 };
 
@@ -178,7 +168,6 @@ ioClient.on('connect', () => {
 
 ioClient.on('display existing rooms', (rooms) => {
   displayExistingRooms(rooms);
-  console.log('display rooms now!', rooms)
 });
 
 ioClient.on('room created', (roomId) => {
@@ -188,17 +177,11 @@ ioClient.on('room created', (roomId) => {
 ioClient.on('start game', (emptyMatrix) => {
   createTable(emptyMatrix);
   addGameInputListener();
+  hideElement('activeRooms');
 });
 
 ioClient.on('wait player 2', (message) => {
-  // clear page and display the waiting message
-  // document.getElementById('container-create-new-game').innerHTML = '';
-  hideElement('container-create-new-game');
   updateMessageField(message);
-});
-
-ioClient.on('the room is full', () => {
-  console.log('The room is full!');
 });
 
 ioClient.on('user stats on connection', (user) => {
@@ -225,6 +208,7 @@ ioClient.on('game over', (message) => {
 });
 
 ioClient.on('freeze game', (message) => {
+  showElement('messageText');
   updateMessageField(message);
   freezeBoardGame();
 });
@@ -245,6 +229,7 @@ ioClient.on('disconnect', () => {
 
 ioClient.on('rematch was initiated', () => {
   acceptRematch();
+  hideElement('initiate-rematch');
 });
 
 ioClient.on('display leave room button', () => {

@@ -28,7 +28,12 @@ const getUserByEmail = (username, cb) => {
 
 
 const searchToken = (token, cb) => {
-  const query = `SELECT * FROM users JOIN tokens ON users.id = (SELECT user_id FROM tokens WHERE token = "${token}") ORDER BY tokens.id DESC LIMIT 1`;
+  const query = `
+    SELECT * FROM users 
+    JOIN tokens ON users.id = tokens.user_id 
+    WHERE user_id = (SELECT user_id FROM tokens WHERE token = "${token}") 
+    ORDER BY tokens.id DESC 
+    LIMIT 1`;
   return connection.query(query, cb);
 };
 
@@ -60,12 +65,14 @@ const getScores = (cb) => {
   return connection.query(query, cb);
 };
 
-const getUserRank = (score, cb) => {
-  const query = `SELECT score FROM users WHERE users.score >= ${score} ORDER BY score DESC`;
-  return connection.query(query, cb);
-};
-
 
 module.exports = {
-  storeUserData, storeToken, getUserByEmail, searchToken, updateScore, getUserByToken, getUsernamesAndScores, getScores,
+  storeUserData,
+  storeToken,
+  getUserByEmail,
+  searchToken,
+  updateScore,
+  getUserByToken,
+  getUsernamesAndScores,
+  getScores,
 };
