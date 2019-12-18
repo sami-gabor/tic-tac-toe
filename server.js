@@ -17,7 +17,7 @@ const secret = 'Express is awesome!'; // used to sign cookies
 const app = express();
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
   secret,
@@ -66,7 +66,7 @@ passport.deserializeUser((user, cb) => {
 });
 
 
-app.listen(3000);
+app.listen(3000, console.log('Listening on port 3000.'));
 
 
 // ============================================================= //

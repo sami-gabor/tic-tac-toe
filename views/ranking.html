@@ -17,7 +17,7 @@
     <script>
         const displayRanking = () => {
             const $rankingContainer = document.getElementById('rankingList');
-            fetch("http://localhost:3000/users")
+            fetch("/users")
                 .then(response => response.json())
                 .then(users => {
                     users.forEach((user) => {
