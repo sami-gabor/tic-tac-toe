@@ -12,12 +12,13 @@ function ensureAuthMiddleware(req, res, next) {
     return res.redirect('/login');
   }
 
-  // if token found, query for user and store on req.user and call next() --> stored by passport-local
+  // if token found, query for user and store on req.user and call next()
+  // stored by passport-local
   db.searchToken(token, (err, result) => { // result will have data from both tables(users & tokens)
     if (err) {
       return res.redirect('/db-error');
     }
-    
+
     if (token === result[0].token) {
       next();
     }

@@ -281,7 +281,7 @@ server.on('connection', (socket) => {
     resetGame();
   });
 
-  
+
   const standardInput = process.stdin;
   standardInput.setEncoding('utf-8');
   standardInput.on('data', (data) => {
