@@ -1,9 +1,9 @@
 const mysql = require('mysql');
 
 module.exports = mysql.createConnection({
-  host: 'localhost',
-  port: '3307',
+  host: '46.101.171.162',
+  port: '3306',
   user: 'root',
   password: 'root',
-  database: 'tic',
+  database: 'tictactoe_db',
 });

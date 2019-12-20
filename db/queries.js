@@ -6,8 +6,8 @@ const storeUserData = (username, password, email) => {
     [username, password, email],
   ];
 
-  // id, username, email, password, score, joined
-  connection.query('INSERT INTO users (username, password, email) VALUES ?', [results], (error) => {
+  // id, username, email, password_hash, score, joined
+  connection.query('INSERT INTO users (username, password_hash, email) VALUES ?', [results], (error) => {
     if (error) throw error;
   });
 };

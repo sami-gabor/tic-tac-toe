@@ -49,7 +49,7 @@ passport.use(new LocalStrategy((username, password, done) => {
     }
 
     return crypto.pbkdf2(password, secret, 1000, 128, 'sha256', (error, derivedKey) => {
-      if (!error && derivedKey.toString('hex') === user[0].password) {
+      if (!error && derivedKey.toString('hex') === user[0].password_hash) {
         return done(null, user);
       }
       return done(null, false);

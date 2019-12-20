@@ -78,9 +78,10 @@ module.exports = (app) => {
 
       db.getUserByEmail(email, (error, result) => {
         const token = crypto.randomBytes(128).toString('hex');
+
         if (error) {
           console.log('Error database connection: ', error);
-        } else if (result[0].username === req.user.username) {
+        } else if (result[0] && result[0].username === req.user.username) {
           db.storeToken(token, result[0].id);
         } else {
           db.storeUserData(username, password, email);
@@ -93,10 +94,15 @@ module.exports = (app) => {
 
 
   app.post('/login-local',
+    (req, res, next) => {
+      next(); // optional middleware
+    },
+
     passport.authenticate('local', { failureRedirect: '/failed' }),
 
     (req, res) => { // req.user --> array of RowDataPacket
       const token = crypto.randomBytes(128).toString('hex');
+
       db.storeToken(token, req.user[0].id);
       res.cookie('token', token);
       res.redirect('/');
@@ -105,9 +111,7 @@ module.exports = (app) => {
 
   app.post('/register-local', (req, res) => {
     const hash = crypto.pbkdf2Sync(req.body.password, secret, 1000, 128, 'sha256').toString('hex');
-
     db.storeUserData(req.body.username, hash, req.body.email);
-
     res.redirect('/login');
   });
 };
