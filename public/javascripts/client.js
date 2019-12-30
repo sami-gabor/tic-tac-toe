@@ -1,4 +1,4 @@
-const ioClient = io.connect('http://localhost:8000');
+const ioClient = io.connect('http://165.22.72.239:8000');
 
 
 const hideElement = (elementId) => {

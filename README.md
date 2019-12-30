@@ -23,3 +23,7 @@ PuTTY config:
     * Session - Host Name --> `root`
     * Connection/SSH/Auth --> browse private-key.ppk
     * Connection/Data - Auto-login username --> droplet IP address
+
+
+###### Open a port on DO(by default only 22, 80 and 443 are open)
+`sudo ufw allow 5000/tcp`
