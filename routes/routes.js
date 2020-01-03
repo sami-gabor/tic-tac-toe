@@ -19,8 +19,10 @@ function ensureAuthMiddleware(req, res, next) {
       return res.redirect('/db-error');
     }
 
-    if (token === result[0].token) {
+    if (result[0] && token === result[0].token) {
       next();
+    } else {
+      res.redirect('/login'); // github user saved to db and it should log not redirect to login(on a second try it works!)
     }
   });
 }
@@ -81,10 +83,13 @@ module.exports = (app) => {
 
         if (error) {
           console.log('Error database connection: ', error);
-        } else if (result[0] && result[0].username === req.user.username) {
-          db.storeToken(token, result[0].id);
-        } else {
+        }
+
+        if (!result[0]) {
           db.storeUserData(username, password, email);
+          console.log('A profile was created, but not automatically redirected to homepage. Must click SIGN IN WITH GITHUB again...');
+        } else if (result[0].username === req.user.username) {
+          db.storeToken(token, result[0].id);
         }
 
         res.cookie('token', token);
